@@ -1,8 +1,13 @@
+using MobileShop.Service;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession();
+builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -21,5 +26,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.UseSession();
+
 
 app.Run();
