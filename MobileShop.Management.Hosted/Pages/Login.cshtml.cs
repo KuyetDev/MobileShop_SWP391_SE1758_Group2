@@ -43,7 +43,7 @@ namespace MobileShop.Management.Hosted.Pages
                 try
                 {
                     var mail = Request.Form["mail"];
-                    var password = _encryptionService.HashMD5(Request.Form["password"]!);
+                    var password = _encryptionService.GetHashMd5(Request.Form["password"]!);
                     var response = await _client.GetAsync(ApiUri + $"account/get-account-mail-password/{mail}&{password}");
                     var strData = await response.Content.ReadAsStringAsync();
 

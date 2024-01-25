@@ -9,23 +9,16 @@ namespace MobileShop.Service
 {
     public interface IEncryptionService
     {
-        string HashMD5(string input);
+        string GetHashMd5(string input);
     }
 
     public class EncryptionService : IEncryptionService
     {
-
-        public EncryptionService()
+        public string GetHashMd5(string input)
         {
-
-        }
-
-        public string HashMD5(string input)
-        {
-            MD5 md5 = MD5.Create();
-            byte[] hash = md5.ComputeHash(Encoding.UTF8.GetBytes(input));
-            StringBuilder hashSb = new StringBuilder();
-            foreach (byte b in hash)
+            var hash = MD5.HashData(Encoding.UTF8.GetBytes(input));
+            var hashSb = new StringBuilder();
+            foreach (var b in hash)
             {
                 hashSb.Append(b.ToString("X2"));
             }
