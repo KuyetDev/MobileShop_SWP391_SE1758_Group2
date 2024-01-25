@@ -1,11 +1,5 @@
-﻿using MobileShop.Entity.DTOs.CategoryDTO;
-using MobileShop.Entity.DTOs.ImageDTO;
+﻿using MobileShop.Entity.DTOs.ImageDTO;
 using MobileShop.Entity.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MobileShop.Service
 {
@@ -48,11 +42,7 @@ namespace MobileShop.Service
             try
             {
                 var image = _context.Images.FirstOrDefault(i => i.ImageId == id && i.IsDeleted == false);
-                if (image != null)
-                {
-                    return image;
-                }
-                return null;
+                return image ?? null;
             }
             catch (Exception e)
             {
@@ -65,11 +55,7 @@ namespace MobileShop.Service
             try
             {
                 var image = _context.Images.FirstOrDefault(i => i.ImageLink != null && i.ImageLink.ToLower().Equals(link.ToLower()) && i.IsDeleted == false);
-                if (image != null)
-                {
-                    return image;
-                }
-                return null;
+                return image;
             }
             catch (Exception e)
             {
@@ -136,7 +122,7 @@ namespace MobileShop.Service
                 _context.SaveChanges();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }

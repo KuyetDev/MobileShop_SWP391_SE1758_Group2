@@ -1,13 +1,5 @@
-﻿using MobileShop.Entity.DTOs.CategoryDTO;
-using MobileShop.Entity.DTOs.ProductDTO;
+﻿using MobileShop.Entity.DTOs.ProductDTO;
 using MobileShop.Entity.Models;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace MobileShop.Service
 {
@@ -51,11 +43,7 @@ namespace MobileShop.Service
             try
             {
                 var products = _context.Products.FirstOrDefault(p => p.ProductId == id && p.IsDeleted == false);
-                if (products != null)
-                {
-                    return products;
-                }
-                return null;
+                return products ?? null;
             }
             catch (Exception e)
             {
@@ -171,7 +159,7 @@ namespace MobileShop.Service
                 _context.SaveChanges();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
