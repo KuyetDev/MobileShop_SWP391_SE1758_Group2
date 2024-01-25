@@ -1,12 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MobileShop.Entity.DTOs.AccountDTO;
-using MobileShop.Entity.DTOs.CategoryDTO;
+﻿using MobileShop.Entity.DTOs.CategoryDTO;
 using MobileShop.Entity.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MobileShop.Service
 {
@@ -49,11 +42,7 @@ namespace MobileShop.Service
             try
             {
                 var category = _context.Categories.FirstOrDefault(c => c.CategoryId == id && c.IsDeleted == false);
-                if (category != null)
-                {
-                    return category;
-                }
-                return null;
+                return category ?? null;
             }
             catch(Exception e)
             {
@@ -116,7 +105,7 @@ namespace MobileShop.Service
                 _context.SaveChanges();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
