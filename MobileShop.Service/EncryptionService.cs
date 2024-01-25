@@ -9,12 +9,12 @@ namespace MobileShop.Service
 {
     public interface IEncryptionService
     {
-        string GetHashMd5(string input);
+        string HashMD5(string input);
     }
 
     public class EncryptionService : IEncryptionService
     {
-        public string GetHashMd5(string input)
+        public string HashMD5(string input)
         {
             var hash = MD5.HashData(Encoding.UTF8.GetBytes(input));
             var hashSb = new StringBuilder();
