@@ -15,8 +15,12 @@ builder.Services.AddDbContext<FstoreContext>(opt =>
 {
     opt.UseSqlServer(configuration.GetConnectionString("SqlConnection"));
 });
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
+builder.Services.AddScoped<IValidateService, ValidateService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

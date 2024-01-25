@@ -8,6 +8,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
+builder.Services.AddScoped<IValidateService, ValidateService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

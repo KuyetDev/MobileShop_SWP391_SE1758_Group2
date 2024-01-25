@@ -118,7 +118,7 @@ namespace MobileShop.Service
                 var password = string.Empty;
                 if (account.Password is not null)
                 {
-                    password = _encryptionService.GetHashMd5(account.Password);
+                    password = _encryptionService.HashMD5(account.Password);
                 }
                 var requestAccount = new Account
                 {
