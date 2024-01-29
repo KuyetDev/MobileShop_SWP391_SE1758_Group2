@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using MobileShop.Entity.Models;
 using MobileShop.Service;
 using MobileShop.Shared.Constants;
-using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -13,26 +11,28 @@ namespace MobileShop.Management.Hosted.Pages
 {
     public class DeleteProductModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
         private readonly HttpClient _client;
-        private string ApiUri = string.Empty;
-        private string LoginKey = "_login";
-        public string message { get; set; }
-        public Product product { get; set; }
-        public Image image { get; set; }
-        public List<Category> Categories { get; set; }
+        private string _apiUri;
+        private const string LoginKey = "_login";
+        public string Message { get; set; }
+        public Product? Product { get; set; }
+        public Image? Image { get; set; }
+        public List<Category>? Categories { get; set; }
 
-        public DeleteProductModel(IWebHostEnvironment environment, IValidateService validateService)
+        public DeleteProductModel(IWebHostEnvironment environment, IValidateService validateService, string message,
+            Image image, List<Category> categories)
         {
+            Message = message;
+            Image = image;
+            Categories = categories;
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             _client.DefaultRequestHeaders.Accept.Add(contentType);
-            ApiUri = $"{UrlConstant.ApiBaseUrl}/api/";
-
+            _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
         }
+
         public async Task<IActionResult> OnGet()
         {
-
             var json = HttpContext.Session.GetString(LoginKey) ?? string.Empty;
 
             var option = new JsonSerializerOptions
@@ -47,25 +47,28 @@ namespace MobileShop.Management.Hosted.Pages
 
             try
             {
+                var idp = Convert.ToInt32(Request.Query["idp"].ToString());
 
-                int idp = Convert.ToInt32(Request.Query["idp"].ToString());
-
-                var response = await _client.GetAsync(ApiUri + $"category/get-all-category");
+                var response = await _client.GetAsync(_apiUri + $"category/get-all-category");
                 var strData = await response.Content.ReadAsStringAsync();
-                Categories = System.Text.Json.JsonSerializer.Deserialize<List<Category>>(strData, option);
+                Categories = JsonSerializer.Deserialize<List<Category>>(strData, option);
 
-                var response2 = await _client.GetAsync(ApiUri + $"product/get-product-id/{idp}");
+                var response2 = await _client.GetAsync(_apiUri + $"product/get-product-id/{idp}");
                 var strData2 = await response2.Content.ReadAsStringAsync();
-                product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData2, option);
+                Product = JsonSerializer.Deserialize<Product>(strData2, option);
 
-                var response3 = await _client.GetAsync(ApiUri + $"image/get-image-id/{product.ImageId}");
-                var strData3 = await response3.Content.ReadAsStringAsync();
-                image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData3, option);
+                if (Product != null)
+                {
+                    var response3 = await _client.GetAsync(_apiUri + $"image/get-image-id/{Product.ImageId}");
+                    var strData3 = await response3.Content.ReadAsStringAsync();
+                    Image = JsonSerializer.Deserialize<Image>(strData3, option);
+                }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return RedirectToPage("ProductManager");
             }
+
             return Page();
         }
 
@@ -78,15 +81,16 @@ namespace MobileShop.Management.Hosted.Pages
                 PropertyNameCaseInsensitive = true,
             };
 
-            var response2 = await _client.GetAsync(ApiUri + $"product/get-product-id/{idp}");
+            var response2 = await _client.GetAsync(_apiUri + $"product/get-product-id/{idp}");
             var strData2 = await response2.Content.ReadAsStringAsync();
-            product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData2, option);
+            Product = JsonSerializer.Deserialize<Product>(strData2, option);
 
-            product.IsDeleted = true;
+            if (Product == null) return RedirectToPage("ProductManager");
+            Product.IsDeleted = true;
 
-            var productJson = System.Text.Json.JsonSerializer.Serialize(product);
+            var productJson = JsonSerializer.Serialize(Product);
             var content = new StringContent(productJson, Encoding.UTF8, "application/json");
-            await _client.PutAsync(ApiUri + "product/put-product", content);
+            await _client.PutAsync(_apiUri + "product/put-product", content);
 
             return RedirectToPage("ProductManager");
         }

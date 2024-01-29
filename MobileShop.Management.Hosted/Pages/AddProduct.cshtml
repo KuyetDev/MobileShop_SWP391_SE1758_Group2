@@ -9,7 +9,7 @@
 <section class="checkout spad">
     <div class="container">
         <div class="checkout__form">
-            <p style="color:Tomato;">@Model.message</p>
+            <p style="color:Tomato;">@Model.Message</p>
             <form method="post" enctype="multipart/form-data">
                 <div class="row">
                     <div class="col-lg-8 col-md-6">
@@ -25,9 +25,12 @@
                                 <div class="checkout__input">
                                     <p>Category<span>*</span></p>
                                     <select name="department" class="checkout__input">
-                                        @foreach (var item in Model.Categories)
+                                        @if (Model.Categories != null)
                                         {
-                                            <option value="@item.CategoryId">@item.CategoryName</option>
+                                            foreach (var item in Model.Categories)
+                                            {
+                                                <option value="@item.CategoryId">@item.CategoryName</option>
+                                            }
                                         }
                                     </select>
                                 </div>

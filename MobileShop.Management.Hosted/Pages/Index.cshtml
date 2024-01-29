@@ -2,15 +2,13 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Account manager";
-    string? json = HttpContextAccessor.HttpContext.Session.GetString("_login") ?? "";
+    var json = HttpContextAccessor.HttpContext?.Session.GetString("_login") ?? "";
 
     Account? account = null;
-    int quantity = 0;
-    if (!json.Equals(""))
+    if (!json.Equals(string.Empty))
     {
         account = JsonConvert.DeserializeObject<Account>(json);
     }
-
 }
 <div id="preloder">
     <div class="loader"></div>
@@ -18,7 +16,7 @@
 <section class="hero hero-normal">
     <div class="container">
         <div class="row">
-            
+
             <div class="col-lg-9">
                 <div class="hero__search">
                     <div class="hero__search__form">
@@ -42,82 +40,80 @@
 {
     <section class="breadcrumb-section set-bg" data-setbg="image/breadcrumb.jpg">
         <div class="container">
-                <div class="row">
-                    <div class="col-lg-12 text-center">
-                        <div class="breadcrumb__text">
-                            <h2  style="color:MediumSeaGreen;">ACCOUNT MANAGER</h2>
-                             <a asp-page="AddAccount" class="primary-btn">Add account</a>
-                        </div>
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb__text">
+                        <h2 style="color:MediumSeaGreen;">ACCOUNT MANAGER</h2>
+                        <a asp-page="AddAccount" class="primary-btn">Add account</a>
                     </div>
                 </div>
             </div>
-        </section>
-        }
-                <br>
+        </div>
+    </section>
+}
+<br>
 <div class="container">
     <table class="table table-striped">
         <thead>
-            <tr>
-                <th>Full Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Address</th>
-                <th>Date of birht</th>
-                <th>Gender</th>
-                <th>Role</th>
-                <th>Active</th>
-                <th>Action</th>
-            </tr>
+        <tr>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Date of birht</th>
+            <th>Gender</th>
+            <th>Role</th>
+            <th>Active</th>
+            <th>Action</th>
+        </tr>
         </thead>
         <tbody>
-
+        @if (Model.Accounts is not null)
+        {
             @foreach (var item in Model.Accounts)
             {
-                @if(account is not null)
+                @if (account is not null)
                 {
                     @if (account.AccountId != item.AccountId)
                     {
-                        if(account.RoleId == 1 && (item.RoleId == 2 || item.RoleId == 3)){
-                        <tr>
-                            <td>@item.FullName</td>
-                            <td>@item.Mail</td>
-                            <td>@item.Phone</td>
-                            <td>@item.Address</td>
-                            <td>@item.Dob</td>
-                            @if (item.Gender == true)
+                        if (account.RoleId != 1 || item.RoleId is not (2 or 3))
+                        {
+                            if (account.RoleId == 2 && item.RoleId == 3)
                             {
-                                <td>Male</td>
-                            }
-                            else
-                            {
-                                <td>Female</td>
-                            }
-                            @if(item.RoleId == 3)
-                            {
-                                <td>User</td>
-                            }else if (item.RoleId == 2 && account.RoleId == 1)
-                            {
-                                <td>Staff</td>
-                            }
+                                <tr>
+                                    <td>@item.FullName</td>
+                                    <td>@item.Mail</td>
+                                    <td>@item.Phone</td>
+                                    <td>@item.Address</td>
+                                    <td>@item.Dob</td>
+                                    @if (item.Gender == true)
+                                    {
+                                        <td>Male</td>
+                                    }
+                                    else
+                                    {
+                                        <td>Female</td>
+                                    }
 
-                            <td>
-                                @if (item.Active == false)
-                                {
-                                    <a href="Index?fstore=enable&aid=@item.AccountId" style="color:Tomato;">Disable</a>
-                                }
-                                else
-                                {
+                                    <td>User</td>
 
-                                    <a href="Index?fstore=disable&aid=@item.AccountId" style="color:DodgerBlue;">Enable</a>
-                                }
-                            </td>
-                            <td>
-                                <a asp-page="UpdateAccount" asp-route-ida="@item.AccountId" style="color:MediumSeaGreen;">Update</a> |
-                                <a asp-page="DeleteAccount" asp-route-ida="@item.AccountId" style="color:Tomato;">Delete</a>
-                            </td>
-                            </tr>
+                                    <td>
+                                        @if (item.Active == false)
+                                        {
+                                            <a href="Index?fstore=enable&aid=@item.AccountId" style="color:Tomato;">Disable</a>
+                                        }
+                                        else
+                                        {
+                                            <a href="Index?fstore=disable&aid=@item.AccountId" style="color:DodgerBlue;">Enable</a>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a asp-page="UpdateAccount" asp-route-ida="@item.AccountId" style="color:MediumSeaGreen;">Update</a>
+                                    </td>
+                                </tr>
+                            }
                         }
-                        else if(account.RoleId == 2 && item.RoleId == 3)
+                        else
                         {
                             <tr>
                                 <td>@item.FullName</td>
@@ -134,7 +130,15 @@
                                     <td>Female</td>
                                 }
 
-                                    <td>User</td>
+                                @switch (item.RoleId)
+                                {
+                                    case 3:
+                                        <td>User</td>
+                                        break;
+                                    case 2 when account.RoleId == 1:
+                                        <td>Staff</td>
+                                        break;
+                                }
 
                                 <td>
                                     @if (item.Active == false)
@@ -143,20 +147,19 @@
                                     }
                                     else
                                     {
-
                                         <a href="Index?fstore=disable&aid=@item.AccountId" style="color:DodgerBlue;">Enable</a>
                                     }
                                 </td>
                                 <td>
-                                    <a asp-page="UpdateAccount" asp-route-ida="@item.AccountId" style="color:MediumSeaGreen;">Update</a>
+                                    <a asp-page="UpdateAccount" asp-route-ida="@item.AccountId" style="color:MediumSeaGreen;">Update</a> |
+                                    <a asp-page="DeleteAccount" asp-route-ida="@item.AccountId" style="color:Tomato;">Delete</a>
                                 </td>
                             </tr>
-                            
                         }
                     }
-
                 }
             }
+        }
         </tbody>
     </table>
 </div>

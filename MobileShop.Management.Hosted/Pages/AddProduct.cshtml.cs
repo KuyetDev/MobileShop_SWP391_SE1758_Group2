@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MobileShop.Entity.Models;
@@ -9,20 +8,17 @@ using System.ComponentModel.DataAnnotations;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using static System.Net.Mime.MediaTypeNames;
+using Image = MobileShop.Entity.Models.Image;
 
 namespace MobileShop.Management.Hosted.Pages
 {
     public class AddProductModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
         private readonly HttpClient _client;
-        private string ApiUri = string.Empty;
-        private string LoginKey = "_login";
-        public string message { get; set; }
-        public List<Product>? Products { get; set; }
-        public List<Category> Categories { get; set; }
-        private IValidateService _validateService;
+        private string _apiUri;
+        private const string LoginKey = "_login";
+        public string Message { get; set; }
+        public List<Category>? Categories { get; set; }
         private IWebHostEnvironment _environment;
         [Required(ErrorMessage = "Please choose at least one file")]
         [DataType(DataType.Upload)]
@@ -30,14 +26,16 @@ namespace MobileShop.Management.Hosted.Pages
         [BindProperty]
         public IFormFile[] FileUploads { get; set; }
 
-        public AddProductModel(IWebHostEnvironment environment, IValidateService validateService)
+        public AddProductModel(IWebHostEnvironment environment, IValidateService validateService, ILogger<IndexModel> logger, string message, List<Category> categories, IFormFile[] fileUploads)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             _client.DefaultRequestHeaders.Accept.Add(contentType);
-            ApiUri = $"{UrlConstant.ApiBaseUrl}/api/";
+            _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _environment = environment;
-            _validateService = validateService;
+            Message = message;
+            Categories = categories;
+            FileUploads = fileUploads;
         }
 
         public async Task<IActionResult> OnGet()
@@ -54,7 +52,7 @@ namespace MobileShop.Management.Hosted.Pages
                 return RedirectToPage("Login");
             }
 
-            var response = await _client.GetAsync(ApiUri + $"category/get-all-category");
+            var response = await _client.GetAsync(_apiUri + $"category/get-all-category");
             var strData = await response.Content.ReadAsStringAsync();
             Categories = System.Text.Json.JsonSerializer.Deserialize<List<Category>>(strData, option);
             return Page();
@@ -68,30 +66,30 @@ namespace MobileShop.Management.Hosted.Pages
                 PropertyNameCaseInsensitive = true,
             };
 
-            var response = await _client.GetAsync(ApiUri + $"category/get-all-category");
+            var response = await _client.GetAsync(_apiUri + $"category/get-all-category");
             var strData = await response.Content.ReadAsStringAsync();
             Categories = System.Text.Json.JsonSerializer.Deserialize<List<Category>>(strData, option);
 
             var filename = string.Empty;
-            if (FileUploads != null)
             {
                 var allowedExtensions = new[] { ".png", ".jpg", ".jpeg", ".gif" };
-                foreach (var FileUpload in FileUploads)
+                foreach (var fileUpload in FileUploads)
                 {
-                    var extension = Path.GetExtension(FileUpload.FileName);
+                    var extension = Path.GetExtension(fileUpload.FileName);
                     if (allowedExtensions.Contains(extension.ToLower()))
                     {
-                        var basepath = _environment.ContentRootPath.Substring(0, _environment.ContentRootPath.IndexOf("MobileShop.Management.Hosted"));
-                        var fileadmin = basepath + "MobileShop.Management.Hosted\\wwwroot\\image\\" + FileUpload.FileName;
-                        var fileuser = basepath + "MobileShop.User.Hosted\\wwwroot\\image\\" + FileUpload.FileName;
-                        filename = FileUpload.FileName;
-                        using (var fileSream = new FileStream(fileadmin, FileMode.Create))
+                        var basePath = _environment.ContentRootPath[.._environment.ContentRootPath.IndexOf("MobileShop.Management.Hosted", StringComparison.Ordinal)];
+                        var fileAdmin = basePath + @"MobileShop.Management.Hosted\wwwroot\image\" + fileUpload.FileName;
+                        var fileUser = basePath + @"MobileShop.User.Hosted\wwwroot\image\" + fileUpload.FileName;
+                        filename = fileUpload.FileName;
+                        await using (var fileStream = new FileStream(fileAdmin, FileMode.Create))
                         {
-                            await FileUpload.CopyToAsync(fileSream);
+                            await fileUpload.CopyToAsync(fileStream);
                         }
-                        using (var fileSream = new FileStream(fileuser, FileMode.Create))
+
+                        await using (var fileStream = new FileStream(fileUser, FileMode.Create))
                         {
-                            await FileUpload.CopyToAsync(fileSream);
+                            await fileUpload.CopyToAsync(fileStream);
                         }
                     }
                     else
@@ -107,21 +105,21 @@ namespace MobileShop.Management.Hosted.Pages
                 || Request.Form["price"].Equals(string.Empty)
                 || Request.Form["description"].Equals(string.Empty))
             {
-                message = "Add failded, check all infomation";
+                Message = "Add failed, check all information";
                 return Page();
             }
 
-            Entity.Models.Image newImage = null;
+            Image? newImage;
             try
             {
 
-                var response3 = await _client.GetAsync(ApiUri + $"image/get-image-link/{filename}");
+                var response3 = await _client.GetAsync(_apiUri + $"image/get-image-link/{filename}");
                 var strData3 = await response3.Content.ReadAsStringAsync();
-                newImage = System.Text.Json.JsonSerializer.Deserialize<Entity.Models.Image>(strData3, option);
+                newImage = System.Text.Json.JsonSerializer.Deserialize<Image>(strData3, option);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                var requestImage = new Entity.Models.Image
+                var requestImage = new Image
                 {
                     ImageLink = filename,
                     CreateDate = DateTime.Now,
@@ -130,19 +128,21 @@ namespace MobileShop.Management.Hosted.Pages
 
                 var json = System.Text.Json.JsonSerializer.Serialize(requestImage);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                await _client.PostAsync(ApiUri + "image/add-image", content);
+                await _client.PostAsync(_apiUri + "image/add-image", content);
 
-                var response2 = await _client.GetAsync(ApiUri + $"image/get-image-link/{filename}");
+                var response2 = await _client.GetAsync(_apiUri + $"image/get-image-link/{filename}");
                 var strData2 = await response2.Content.ReadAsStringAsync();
-                newImage = System.Text.Json.JsonSerializer.Deserialize<Entity.Models.Image>(strData2, option);
+                newImage = System.Text.Json.JsonSerializer.Deserialize<Image>(strData2, option);
             }
 
             var accountJson = HttpContext.Session.GetString(LoginKey) ?? string.Empty;
             var account = JsonConvert.DeserializeObject<Account>(accountJson);
 
+            if (newImage == null) return RedirectToPage("ProductManager");
+            if (account == null) return RedirectToPage("ProductManager");
             var requestProduct = new Product
             {
-                ProductName = Request.Form["pname"],
+                ProductName = Request.Form["pname"].ToString(),
                 Price = Convert.ToDouble(Request.Form["price"]),
                 Quantity = Convert.ToInt32(Request.Form["quantity"]),
                 Description = Request.Form["description"],
@@ -155,7 +155,8 @@ namespace MobileShop.Management.Hosted.Pages
 
             var productJson = System.Text.Json.JsonSerializer.Serialize(requestProduct);
             var content2 = new StringContent(productJson, Encoding.UTF8, "application/json");
-            await _client.PostAsync(ApiUri + "product/add-product", content2);
+            await _client.PostAsync(_apiUri + "product/add-product", content2);
+
             return RedirectToPage("ProductManager");
         }
     }

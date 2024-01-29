@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using MobileShop.Entity.DTOs.CategoryDTO;
+﻿using Microsoft.AspNetCore.Mvc;
 using MobileShop.Entity.DTOs.ImageDTO;
 using MobileShop.Service;
 
@@ -11,9 +9,8 @@ namespace MobileShop.API.Controllers
     public class ImageController : ControllerBase
     {
         private readonly IImageService _imageService;
-        private object category;
 
-        public ImageController(IImageService imageService)
+        public ImageController(IImageService imageService, object category)
         {
             _imageService = imageService;
         }
@@ -22,23 +19,14 @@ namespace MobileShop.API.Controllers
         public IActionResult AddCategory([FromBody] CreateImageRequest image)
         {
             var result = _imageService.AddImage(image);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
             return Ok(result);
         }
 
         [HttpGet("get-all-image")]
         public IActionResult GetAllImage()
         {
-
             var images = _imageService.GetAllImage();
-            if (images != null && images.Count == 0)
-            {
-                return Ok("Don't have image");
-            }
-            return Ok(images);
+            return images.Count == 0 ? Ok("Don't have image") : Ok(images);
         }
 
         [HttpGet("get-image-link/{link}")]
@@ -49,10 +37,11 @@ namespace MobileShop.API.Controllers
             {
                 return NotFound("Image does not exist");
             }
+
             return Ok(image);
         }
 
-        [HttpGet("get-image-id/{id}")]
+        [HttpGet("get-image-id/{id:int}")]
         public IActionResult GetImageById(int id)
         {
             var image = _imageService.GetImageById(id);
@@ -60,20 +49,18 @@ namespace MobileShop.API.Controllers
             {
                 return NotFound("Image does not exist");
             }
+
             return Ok(image);
         }
+
         [HttpPut("put-image")]
         public IActionResult UpdateImage(UpdateImageRequest image)
         {
             var result = _imageService.UpdateImage(image);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
             return Ok(result);
         }
 
-        [HttpDelete("delete-image/{id}")]
+        [HttpDelete("delete-image/{id:int}")]
         public IActionResult DeleteImage(int id)
         {
             var result = _imageService.UpdateDeleteStatusImage(id);
@@ -81,11 +68,8 @@ namespace MobileShop.API.Controllers
             {
                 return StatusCode(500);
             }
+
             return Ok("Delete image complete");
         }
-
-
-
-
     }
 }

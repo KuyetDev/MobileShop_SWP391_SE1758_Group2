@@ -6,9 +6,6 @@ using MobileShop.Shared.Constants;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text;
-using MobileShop.Entity.Models;
-using MobileShop.Service;
-using MobileShop.Shared.Constants;
 
 namespace MobileShop.Management.Hosted.Pages
 {
@@ -17,19 +14,22 @@ namespace MobileShop.Management.Hosted.Pages
         private readonly HttpClient _client;
         private IEncryptionService _encryptionService;
         private IValidateService _validateService;
-        private string ApiUri = "";
-        public string message { get; set; }
-        private string LoginKey = "_login";
-        public Account account { get; set; }
+        private string _apiUri;
+        public string Message { get; set; }
+        private const string LoginKey = "_login";
+        public Account? Account { get; set; }
 
-        public DeleteAccountModel(IEncryptionService encryptionService, IValidateService validateService)
+        public DeleteAccountModel(IEncryptionService encryptionService, IValidateService validateService,
+            string message, Account account)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             _client.DefaultRequestHeaders.Accept.Add(contentType);
-            ApiUri = $"{UrlConstant.ApiBaseUrl}/api/";
+            _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _encryptionService = encryptionService;
             _validateService = validateService;
+            Message = message;
+            Account = account;
         }
 
         public async Task<IActionResult> OnGet()
@@ -57,10 +57,10 @@ namespace MobileShop.Management.Hosted.Pages
                 return RedirectToPage("Login");
             }
 
-            var response = await _client.GetAsync(ApiUri + $"account/get-account-id/{id}");
+            var response = await _client.GetAsync(_apiUri + $"account/get-account-id/{id}");
             var strData = await response.Content.ReadAsStringAsync();
 
-            account = JsonSerializer.Deserialize<Account>(strData, option);
+            Account = JsonSerializer.Deserialize<Account>(strData, option);
 
             return Page();
         }
@@ -81,29 +81,28 @@ namespace MobileShop.Management.Hosted.Pages
                 }
 
                 var id = Convert.ToInt32(HttpContext.Session.GetString("ida"));
-                var response = await _client.GetAsync(ApiUri + $"account/get-account-id/{id}");
+                var response = await _client.GetAsync(_apiUri + $"account/get-account-id/{id}");
                 var strData = await response.Content.ReadAsStringAsync();
 
                 var accountRequest = System.Text.Json.JsonSerializer.Deserialize<Account>(strData, option);
 
-                accountRequest.IsDeleted = true;
+                if (accountRequest != null)
+                {
+                    accountRequest.IsDeleted = true;
 
-                json = System.Text.Json.JsonSerializer.Serialize(accountRequest);
+                    json = System.Text.Json.JsonSerializer.Serialize(accountRequest);
+                }
+
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                await _client.PutAsync(ApiUri + $"account/put-account", content);
+                await _client.PutAsync(_apiUri + $"account/put-account", content);
 
                 return RedirectToPage("Index");
-
-
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                message = "Delete profile failded";
+                Message = "Delete profile failed";
                 return RedirectToPage("DeleteAccount");
-
             }
-
-
         }
     }
 }

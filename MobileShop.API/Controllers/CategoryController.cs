@@ -22,26 +22,17 @@ namespace MobileShop.API.Controllers
         public IActionResult AddCategory([FromBody] CreateCategoryRequest category)
         {
             var result = _categoryService.AddCategory(category);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
             return Ok(result);
         }
 
         [HttpGet("get-all-category")]
         public IActionResult GetAllCategory()
         {
-
             var categories = _categoryService.GetAllCategory();
-            if (categories != null && categories.Count == 0)
-            {
-                return Ok("Don't have category");
-            }
-            return Ok(categories);
+            return categories.Count == 0 ? Ok("Don't have category") : Ok(categories);
         }
 
-        [HttpGet("get-category-id/{id}")]
+        [HttpGet("get-category-id/{id:int}")]
         public IActionResult GetAccountById(int id)
         {
             var category = _categoryService.GetCategoryById(id);
@@ -49,6 +40,7 @@ namespace MobileShop.API.Controllers
             {
                 return NotFound("Category does not exist");
             }
+
             return Ok(category);
         }
 
@@ -56,14 +48,10 @@ namespace MobileShop.API.Controllers
         public IActionResult UpdateCategory(UpdateCategoryRequest category)
         {
             var result = _categoryService.UpdateCategory(category);
-            if (result == null)
-            {
-                return StatusCode(500);
-            }
             return Ok(result);
         }
 
-        [HttpDelete("delete-category/{id}")]
+        [HttpDelete("delete-category/{id:int}")]
         public IActionResult DeleteAccount(int id)
         {
             var result = _categoryService.UpdateDeleteStatusCategory(id);
@@ -71,6 +59,7 @@ namespace MobileShop.API.Controllers
             {
                 return StatusCode(500);
             }
+
             return Ok("Delete category complete");
         }
     }

@@ -2,15 +2,13 @@
 @model MobileShop.Management.Hosted.Pages.ProductManagerModel
 @{
     ViewData["Title"] = "Product manager";
-    string? json = HttpContextAccessor.HttpContext.Session.GetString("_category") ?? "";
+    var json = HttpContextAccessor.HttpContext?.Session.GetString("_category") ?? "";
 
     Category? category = null;
-    int quantity = 0;
     if (!string.IsNullOrEmpty(json))
     {
         category = JsonConvert.DeserializeObject<Category>(json);
     }
-
 }
 
 <div id="preloder">
@@ -18,7 +16,7 @@
 </div>
 <section class="hero hero-normal">
     <div class="container">
-       
+
         <div class="row">
             <div class="col-lg-3">
                 <div class="hero__categories">
@@ -30,18 +28,25 @@
                         }
                         else
                         {
-                            <span> @category.CategoryName </span>
+                            <span> @category?.CategoryName </span>
                         }
                     </div>
-                    <ul>
-                        @foreach (var item in Model.Categories)
-                        {
+                    @if (Model.Categories is not null)
+                    {
+                        <ul>
+
+                            @foreach (var item in Model.Categories)
+                            {
                                 <li>
-                                <a asp-page="ProductManager" asp-route-categoryid="@item.CategoryId">@item.CategoryName</a>
+                                    <a asp-page="ProductManager" asp-route-categoryid="@item.CategoryId">@item.CategoryName</a>
                                 </li>
-                        }
-                        <li><a asp-page="ProductManager" asp-route-categoryid="">All</a></li>
-                    </ul>
+                            }
+                            <li>
+                                <a asp-page="ProductManager" asp-route-categoryid="">All</a>
+                            </li>
+                        </ul>
+                    }
+
                 </div>
             </div>
             <div class="col-lg-9">
@@ -56,7 +61,7 @@
                 </div>
             </div>
         </div>
-       
+
     </div>
 </section>
 <section class="breadcrumb-section set-bg" data-setbg="image/breadcrumb.jpg">
@@ -75,29 +80,29 @@
 <div class="container">
     <table class="table table-striped">
         <thead>
-            <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Action</th>
-            </tr>
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Action</th>
+        </tr>
         </thead>
-        <tbody>
-            @foreach (var item in Model.Products)
+        @if (Model.Products is not null)
+        {
+            @foreach (var item in Model.Products.Where(item => item.IsDeleted == false))
             {
-                if (item.IsDeleted == false)
-                {
-                    <tr>
-                        <td>@item.ProductName</td>
-                        <td>@item.Price</td>
-                        <td>@item.Quantity</td>
-                        <td>
-                            <a asp-page="UpdateProduct" asp-route-idp="@item.ProductId" style="color:MediumSeaGreen;">Update</a> |
-                            <a asp-page="DeleteProduct" asp-route-idp="@item.ProductId" style="color:Tomato;">Delete</a>
-                        </td>
-                    </tr>
-                }
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@item.Price</td>
+                    <td>@item.Quantity</td>
+                    <td>
+                        <a asp-page="UpdateProduct" asp-route-idp="@item.ProductId" style="color:MediumSeaGreen;">Update</a> |
+                        <a asp-page="DeleteProduct" asp-route-idp="@item.ProductId" style="color:Tomato;">Delete</a>
+                    </td>
+                </tr>
             }
+        }
+        <tbody>
         </tbody>
     </table>
 </div>

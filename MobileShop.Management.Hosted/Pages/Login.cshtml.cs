@@ -13,16 +13,18 @@ namespace MobileShop.Management.Hosted.Pages
     {
         private readonly HttpClient _client;
         private IEncryptionService _encryptionService;
-        private string ApiUri = "";
-        public string message { get; set; }
-        private string loginKey = "_login";
-        public LoginModel(IEncryptionService encryptionService)
+        private string _apiUri;
+        public string Message { get; set; }
+        private const string LoginKey = "_login";
+
+        public LoginModel(IEncryptionService encryptionService, string message)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             _client.DefaultRequestHeaders.Accept.Add(contentType);
-            ApiUri = $"{UrlConstant.ApiBaseUrl}/api/";
+            _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _encryptionService = encryptionService;
+            Message = message;
         }
 
         public Task<IActionResult> OnGet()
@@ -32,10 +34,9 @@ namespace MobileShop.Management.Hosted.Pages
 
         public async Task<IActionResult> OnPostSignin()
         {
-
             if (string.IsNullOrEmpty(Request.Form["mail"]) || string.IsNullOrEmpty(Request.Form["password"]))
             {
-                message = "Please, fill all infomations";
+                Message = "Please, fill all infomations";
                 return Page();
             }
             else
@@ -44,7 +45,8 @@ namespace MobileShop.Management.Hosted.Pages
                 {
                     var mail = Request.Form["mail"];
                     var password = _encryptionService.HashMD5(Request.Form["password"]!);
-                    var response = await _client.GetAsync(ApiUri + $"account/get-account-mail-password/{mail}&{password}");
+                    var response =
+                        await _client.GetAsync(_apiUri + $"account/get-account-mail-password/{mail}&{password}");
                     var strData = await response.Content.ReadAsStringAsync();
 
                     var option = new JsonSerializerOptions
@@ -53,29 +55,25 @@ namespace MobileShop.Management.Hosted.Pages
                     };
 
                     var account = System.Text.Json.JsonSerializer.Deserialize<Account>(strData, option);
-                    if (account != null &&
-                        (account.RoleId == 1 || account.RoleId == 2) &&
-                         account.Active == true && account.IsDeleted == false)
+                    if (account is { RoleId: 1 or 2 } and { Active: true, IsDeleted: false })
                     {
                         var json = JsonConvert.SerializeObject(account);
-                        HttpContext.Session.SetString(loginKey, json);
+                        HttpContext.Session.SetString(LoginKey, json);
                         return RedirectToPage("Index");
                     }
 
                     else
                     {
-                        message = "Login failed";
+                        Message = "Login failed";
                         return Page();
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    message = "Login failed";
+                    Message = "Login failed";
                     return Page();
                 }
             }
-
         }
-
     }
 }
