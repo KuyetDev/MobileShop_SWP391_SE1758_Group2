@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MobileShop.Entity.DTOs
+﻿namespace MobileShop.Entity.DTOs
 {
-    public class BaseResponseDTO
+    public class BaseResponseDto
     {
         public bool IsSuccess { get; set; }
         public string? Message { get; set; }

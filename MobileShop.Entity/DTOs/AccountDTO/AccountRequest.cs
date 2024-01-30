@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MobileShop.Entity.DTOs.AccountDTO
+﻿namespace MobileShop.Entity.DTOs.AccountDTO
 {
-    public class GetAccountRequest
+    public class AccountRequest
     {
         public int AccountId { get; set; }
 
@@ -26,7 +20,7 @@ namespace MobileShop.Entity.DTOs.AccountDTO
 
         public bool Active { get; set; }
 
-        public string RoleName { get; set; }
+        public string? RoleName { get; set; }
 
         public bool? IsDeleted { get; set; }
     }
