@@ -16,10 +16,10 @@ namespace MobileShop.Management.Hosted.Pages
         private IEncryptionService _encryptionService;
         private IValidateService _validateService;
         private string _apiUri;
-        public string Message { get; set; }
+        public string message { get; set; }
         public const string LoginKey = "_login";
 
-        public AddAccountModel(IEncryptionService encryptionService, IValidateService validateService, string message)
+        public AddAccountModel(IEncryptionService encryptionService, IValidateService validateService)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
@@ -27,7 +27,6 @@ namespace MobileShop.Management.Hosted.Pages
             _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _encryptionService = encryptionService;
             _validateService = validateService;
-            Message = message;
         }
 
         public Task<IActionResult> OnGet()
@@ -60,7 +59,7 @@ namespace MobileShop.Management.Hosted.Pages
                                                               Request.Form["password"].Equals(string.Empty)
                                                               || Request.Form["repassword"].Equals(string.Empty))
             {
-                Message = "Please, fill all information!";
+                message = "Please, fill all information!";
                 return Page();
             }
 
@@ -78,25 +77,25 @@ namespace MobileShop.Management.Hosted.Pages
 
             if (!_validateService.ValidatePhone(phone))
             {
-                Message = "Phone number must 10 characters";
+                message = "Phone number must 10 characters";
                 return Page();
             }
 
             if (!password.Equals(repass))
             {
-                Message = "Password must the same repassword";
+                message = "Password must the same repassword";
                 return Page();
             }
 
             if (!_validateService.ValidateMail(mail))
             {
-                Message = "Email not exist";
+                message = "Email not exist";
                 return Page();
             }
 
             if (!_validateService.ValidateName(fullname))
             {
-                Message = "Full name is Failed";
+                message = "Full name is Failed";
                 return Page();
             }
 
@@ -113,7 +112,7 @@ namespace MobileShop.Management.Hosted.Pages
                 var accountCheck = System.Text.Json.JsonSerializer.Deserialize<Account>(strData, option);
                 if (accountCheck != null)
                 {
-                    Message = "Email register exist, try again";
+                    message = "Email register exist, try again";
                     return Page();
                 }
             }

@@ -1,7 +1,14 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using MobileShop.Entity.Models;
 using MobileShop.Service;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var configuration = builder.Configuration;
+builder.Services.AddDbContext<FstoreContext>(opt =>
+{
+    opt.UseSqlServer(configuration.GetConnectionString("SqlConnection"));
+});
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
@@ -9,6 +16,8 @@ builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IValidateService, ValidateService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

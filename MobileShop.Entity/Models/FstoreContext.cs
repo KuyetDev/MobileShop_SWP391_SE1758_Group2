@@ -113,9 +113,6 @@ public partial class FstoreContext : DbContext
                 .HasColumnType("date")
                 .HasColumnName("expiration_date");
             entity.Property(e => e.IsDeleted).HasColumnName("is_deleted");
-            entity.Property(e => e.ProductsApply)
-                .IsUnicode(false)
-                .HasColumnName("products_apply");
         });
 
         modelBuilder.Entity<Image>(entity =>

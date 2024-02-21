@@ -14,11 +14,14 @@ namespace MobileShop.Management.Hosted.Pages
 {
     public class AddProductModel : PageModel
     {
+        private readonly ILogger<IndexModel> _logger;
         private readonly HttpClient _client;
-        private string _apiUri;
-        private const string LoginKey = "_login";
-        public string Message { get; set; }
-        public List<Category>? Categories { get; set; }
+        private string _apiUri = string.Empty;
+        private string LoginKey = "_login";
+        public string message { get; set; }
+        public List<Product>? Products { get; set; }
+        public List<Category> Categories { get; set; }
+        private IValidateService _validateService;
         private IWebHostEnvironment _environment;
         [Required(ErrorMessage = "Please choose at least one file")]
         [DataType(DataType.Upload)]
@@ -26,16 +29,14 @@ namespace MobileShop.Management.Hosted.Pages
         [BindProperty]
         public IFormFile[] FileUploads { get; set; }
 
-        public AddProductModel(IWebHostEnvironment environment, IValidateService validateService, ILogger<IndexModel> logger, string message, List<Category> categories, IFormFile[] fileUploads)
+        public AddProductModel(IWebHostEnvironment environment, IValidateService validateService)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             _client.DefaultRequestHeaders.Accept.Add(contentType);
             _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _environment = environment;
-            Message = message;
-            Categories = categories;
-            FileUploads = fileUploads;
+            _validateService = validateService;
         }
 
         public async Task<IActionResult> OnGet()
@@ -105,7 +106,7 @@ namespace MobileShop.Management.Hosted.Pages
                 || Request.Form["price"].Equals(string.Empty)
                 || Request.Form["description"].Equals(string.Empty))
             {
-                Message = "Add failed, check all information";
+                message = "Add failed, check all information";
                 return Page();
             }
 

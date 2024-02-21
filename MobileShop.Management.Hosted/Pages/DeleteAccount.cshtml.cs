@@ -14,13 +14,12 @@ namespace MobileShop.Management.Hosted.Pages
         private readonly HttpClient _client;
         private IEncryptionService _encryptionService;
         private IValidateService _validateService;
-        private string _apiUri;
-        public string Message { get; set; }
-        private const string LoginKey = "_login";
-        public Account? Account { get; set; }
+        private string _apiUri = string.Empty;
+        public string message { get; set; }
+        private string LoginKey = "_login";
+        public Account account { get; set; }
 
-        public DeleteAccountModel(IEncryptionService encryptionService, IValidateService validateService,
-            string message, Account account)
+        public DeleteAccountModel(IEncryptionService encryptionService, IValidateService validateService)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
@@ -28,8 +27,6 @@ namespace MobileShop.Management.Hosted.Pages
             _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _encryptionService = encryptionService;
             _validateService = validateService;
-            Message = message;
-            Account = account;
         }
 
         public async Task<IActionResult> OnGet()
@@ -60,7 +57,7 @@ namespace MobileShop.Management.Hosted.Pages
             var response = await _client.GetAsync(_apiUri + $"account/get-account-id/{id}");
             var strData = await response.Content.ReadAsStringAsync();
 
-            Account = JsonSerializer.Deserialize<Account>(strData, option);
+            account = JsonSerializer.Deserialize<Account>(strData, option);
 
             return Page();
         }
@@ -100,7 +97,7 @@ namespace MobileShop.Management.Hosted.Pages
             }
             catch (Exception)
             {
-                Message = "Delete profile failed";
+                message = "Delete profile failed";
                 return RedirectToPage("DeleteAccount");
             }
         }
