@@ -1,11 +1,5 @@
 ﻿using MobileShop.Entity.DTOs.AccountDTO;
 using MobileShop.Entity.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MobileShop.Service
 {
@@ -109,7 +103,7 @@ namespace MobileShop.Service
         {
             try
             {
-                var account = _context.Accounts.Where(a => a.Mail.Equals(email)).FirstOrDefault();
+                var account = _context.Accounts.FirstOrDefault(a => a.Mail.Equals(email));
                 return account ?? null;
             }
             catch (Exception e)
@@ -194,7 +188,7 @@ namespace MobileShop.Service
                 _context.SaveChanges();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }

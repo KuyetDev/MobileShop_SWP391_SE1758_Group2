@@ -1,8 +1,7 @@
 ﻿@{
-    string json = HttpContextAccessor.HttpContext!.Session.GetString("_login") ?? string.Empty;
+    var json = HttpContextAccessor.HttpContext?.Session.GetString("_login") ?? string.Empty;
 
     Account? account = null;
-    var quantity = 0;
     if (!string.IsNullOrEmpty(json))
     {
         account = JsonConvert.DeserializeObject<Account>(json);
