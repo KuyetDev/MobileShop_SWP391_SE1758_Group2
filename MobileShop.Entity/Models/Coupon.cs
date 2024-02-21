@@ -15,7 +15,5 @@ public partial class Coupon
 
     public bool? IsDeleted { get; set; }
 
-    public string? ProductsApply { get; set; }
-
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 }
