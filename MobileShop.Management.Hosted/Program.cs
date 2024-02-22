@@ -17,7 +17,8 @@ builder.Services.AddSession();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IValidateService, ValidateService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
