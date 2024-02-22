@@ -14,17 +14,16 @@ namespace MobileShop.Management.Hosted.Pages
         private readonly HttpClient _client;
         private IEncryptionService _encryptionService;
         private string _apiUri;
-        public string Message { get; set; }
+        public string message { get; set; }
         private const string LoginKey = "_login";
 
-        public LoginModel(IEncryptionService encryptionService, string message)
+        public LoginModel(IEncryptionService encryptionService)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             _client.DefaultRequestHeaders.Accept.Add(contentType);
             _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _encryptionService = encryptionService;
-            Message = message;
         }
 
         public Task<IActionResult> OnGet()
@@ -36,7 +35,7 @@ namespace MobileShop.Management.Hosted.Pages
         {
             if (string.IsNullOrEmpty(Request.Form["mail"]) || string.IsNullOrEmpty(Request.Form["password"]))
             {
-                Message = "Please, fill all infomations";
+                message = "Please, fill all infomations";
                 return Page();
             }
             else
@@ -64,13 +63,13 @@ namespace MobileShop.Management.Hosted.Pages
 
                     else
                     {
-                        Message = "Login failed";
+                        message = "Login failed";
                         return Page();
                     }
                 }
                 catch (Exception)
                 {
-                    Message = "Login failed";
+                    message = "Login failed";
                     return Page();
                 }
             }

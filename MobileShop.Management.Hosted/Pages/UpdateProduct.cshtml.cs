@@ -13,32 +13,30 @@ namespace MobileShop.Management.Hosted.Pages
 {
     public class UpdateProductModel : PageModel
     {
+        private readonly ILogger<IndexModel> _logger;
         private readonly HttpClient _client;
-        private string _apiUri;
-        public const string LoginKey = "_login";
-        public string Message { get; set; }
-        public Product? Product { get; set; }
-        public Image? Image { get; set; }
-        public List<Category>? Categories { get; set; }
+        private string _apiUri = string.Empty;
+        private string LoginKey = "_login";
+        public string message { get; set; }
+        public Product product { get; set; }
+        public Image image { get; set; }
+        public List<Category> Categories { get; set; }
+        private IValidateService _validateService;
         private IWebHostEnvironment _environment;
-
         [Required(ErrorMessage = "Please choose at least one file")]
         [DataType(DataType.Upload)]
         [Display(Name = "Choose file(s) to upload")]
         [BindProperty]
         public IFormFile[] FileUploads { get; set; }
 
-        public UpdateProductModel(IWebHostEnvironment environment, IValidateService validateService,
-            ILogger<IndexModel> logger, string message, List<Category> categories, IFormFile[] fileUploads)
+        public UpdateProductModel(IWebHostEnvironment environment, IValidateService validateService)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             _client.DefaultRequestHeaders.Accept.Add(contentType);
             _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _environment = environment;
-            Message = message;
-            Categories = categories;
-            FileUploads = fileUploads;
+            _validateService = validateService;
         }
 
         public async Task<IActionResult> OnGet()
@@ -65,13 +63,13 @@ namespace MobileShop.Management.Hosted.Pages
 
                 var response2 = await _client.GetAsync(_apiUri + $"product/get-product-id/{idp}");
                 var strData2 = await response2.Content.ReadAsStringAsync();
-                Product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData2, option);
+                product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData2, option);
 
-                if (Product != null)
+                if (product != null)
                 {
-                    var response3 = await _client.GetAsync(_apiUri + $"image/get-image-id/{Product.ImageId}");
+                    var response3 = await _client.GetAsync(_apiUri + $"image/get-image-id/{product.ImageId}");
                     var strData3 = await response3.Content.ReadAsStringAsync();
-                    Image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData3, option);
+                    image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData3, option);
                 }
             }
             catch (Exception)
@@ -93,7 +91,7 @@ namespace MobileShop.Management.Hosted.Pages
 
             var response2 = await _client.GetAsync(_apiUri + $"product/get-product-id/{idp}");
             var strData2 = await response2.Content.ReadAsStringAsync();
-            Product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData2, option);
+            product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData2, option);
 
             var response = await _client.GetAsync(_apiUri + $"category/get-all-category");
             var strData = await response.Content.ReadAsStringAsync();
@@ -143,7 +141,7 @@ namespace MobileShop.Management.Hosted.Pages
                 || Request.Form["price"].Equals(string.Empty)
                 || Request.Form["description"].Equals(string.Empty))
             {
-                Message = "Update failded, check all infomation";
+                message = "Update failded, check all infomation";
                 return Page();
             }
 
@@ -153,7 +151,7 @@ namespace MobileShop.Management.Hosted.Pages
                 {
                     var response4 = await _client.GetAsync(_apiUri + $"image/get-image-link/{fileName}");
                     var strData4 = await response4.Content.ReadAsStringAsync();
-                    Image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData4, option);
+                    image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData4, option);
                 }
                 catch (Exception)
                 {
@@ -170,31 +168,31 @@ namespace MobileShop.Management.Hosted.Pages
 
                     var response5 = await _client.GetAsync(_apiUri + $"image/get-image-link/{fileName}");
                     var strData5 = await response5.Content.ReadAsStringAsync();
-                    Image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData5, option);
+                    image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData5, option);
                 }
             }
             else
             {
-                if (Product != null)
+                if (product != null)
                 {
-                    var response5 = await _client.GetAsync(_apiUri + $"image/get-image-id/{Product.ImageId}");
+                    var response5 = await _client.GetAsync(_apiUri + $"image/get-image-id/{product.ImageId}");
                     var strData5 = await response5.Content.ReadAsStringAsync();
-                    Image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData5, option);
+                    image = System.Text.Json.JsonSerializer.Deserialize<Image>(strData5, option);
                 }
             }
 
             if (account == null) return RedirectToPage("ProductManager");
-            if (Product == null) return RedirectToPage("ProductManager");
-            if (Image == null) return RedirectToPage("ProductManager");
+            if (product == null) return RedirectToPage("ProductManager");
+            if (image == null) return RedirectToPage("ProductManager");
             var requestProduct = new Product
             {
-                ProductId = Product.ProductId,
+                ProductId = product.ProductId,
                 ProductName = Request.Form["pname"].ToString(),
                 Price = Convert.ToDouble(Request.Form["price"]),
                 Quantity = Convert.ToInt32(Request.Form["quantity"]),
                 Description = Request.Form["description"],
                 CategoryId = Convert.ToInt32(Request.Form["department"]),
-                ImageId = Image.ImageId,
+                ImageId = image.ImageId,
                 CreateDate = DateTime.Now,
                 CreateBy = account.AccountId,
                 IsDeleted = false
