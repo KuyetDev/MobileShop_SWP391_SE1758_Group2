@@ -11,7 +11,7 @@ public partial class Coupon
 
     public int DiscountPercent { get; set; }
 
-    public DateTime ExpirationDate { get; set; }
+    public DateTime? ExpirationDate { get; set; }
 
     public bool? IsDeleted { get; set; }
 
