@@ -14,6 +14,7 @@ var configuration = builder.Configuration;
 builder.Services.AddDbContext<FstoreContext>(opt =>
 {
     opt.UseSqlServer(configuration.GetConnectionString("SqlConnection"));
+    opt.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -21,6 +22,9 @@ builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IEncryptionService, EncryptionService>();
 builder.Services.AddScoped<IValidateService, ValidateService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderDetailService, OrderDetailService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

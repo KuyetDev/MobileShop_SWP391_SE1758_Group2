@@ -11,24 +11,22 @@ namespace MobileShop.Management.Hosted.Pages
 {
     public class DeleteProductModel : PageModel
     {
+        private readonly ILogger<IndexModel> _logger;
         private readonly HttpClient _client;
-        private string _apiUri;
-        private const string LoginKey = "_login";
-        public string Message { get; set; }
-        public Product? Product { get; set; }
-        public Image? Image { get; set; }
-        public List<Category>? Categories { get; set; }
+        private string _apiUri = string.Empty;
+        private string LoginKey = "_login";
+        public string message { get; set; }
+        public Product product { get; set; }
+        public Image image { get; set; }
+        public List<Category> Categories { get; set; }
 
-        public DeleteProductModel(IWebHostEnvironment environment, IValidateService validateService, string message,
-            Image image, List<Category> categories)
+        public DeleteProductModel(IWebHostEnvironment environment, IValidateService validateService)
         {
-            Message = message;
-            Image = image;
-            Categories = categories;
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             _client.DefaultRequestHeaders.Accept.Add(contentType);
             _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
+
         }
 
         public async Task<IActionResult> OnGet()
@@ -55,13 +53,13 @@ namespace MobileShop.Management.Hosted.Pages
 
                 var response2 = await _client.GetAsync(_apiUri + $"product/get-product-id/{idp}");
                 var strData2 = await response2.Content.ReadAsStringAsync();
-                Product = JsonSerializer.Deserialize<Product>(strData2, option);
+                product = JsonSerializer.Deserialize<Product>(strData2, option);
 
-                if (Product != null)
+                if (product != null)
                 {
-                    var response3 = await _client.GetAsync(_apiUri + $"image/get-image-id/{Product.ImageId}");
+                    var response3 = await _client.GetAsync(_apiUri + $"image/get-image-id/{product.ImageId}");
                     var strData3 = await response3.Content.ReadAsStringAsync();
-                    Image = JsonSerializer.Deserialize<Image>(strData3, option);
+                    image = JsonSerializer.Deserialize<Image>(strData3, option);
                 }
             }
             catch (Exception)
@@ -83,12 +81,12 @@ namespace MobileShop.Management.Hosted.Pages
 
             var response2 = await _client.GetAsync(_apiUri + $"product/get-product-id/{idp}");
             var strData2 = await response2.Content.ReadAsStringAsync();
-            Product = JsonSerializer.Deserialize<Product>(strData2, option);
+            product = JsonSerializer.Deserialize<Product>(strData2, option);
 
-            if (Product == null) return RedirectToPage("ProductManager");
-            Product.IsDeleted = true;
+            if (product == null) return RedirectToPage("ProductManager");
+            product.IsDeleted = true;
 
-            var productJson = JsonSerializer.Serialize(Product);
+            var productJson = JsonSerializer.Serialize(product);
             var content = new StringContent(productJson, Encoding.UTF8, "application/json");
             await _client.PutAsync(_apiUri + "product/put-product", content);
 

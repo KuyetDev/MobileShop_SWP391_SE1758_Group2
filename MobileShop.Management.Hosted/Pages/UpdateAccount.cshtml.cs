@@ -14,13 +14,12 @@ namespace MobileShop.Management.Hosted.Pages
         private readonly HttpClient _client;
         private IEncryptionService _encryptionService;
         private IValidateService _validateService;
-        private string _apiUri;
-        public string Message { get; set; }
-        private const string LoginKey = "_login";
-        public Account Account { get; set; }
+        private string _apiUri = string.Empty;
+        public string message { get; set; }
+        private string LoginKey = "_login";
+        public Account account { get; set; }
 
-        public UpdateAccountModel(IEncryptionService encryptionService, IValidateService validateService,
-            string message, Account account)
+        public UpdateAccountModel(IEncryptionService encryptionService, IValidateService validateService)
         {
             _client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
@@ -28,8 +27,6 @@ namespace MobileShop.Management.Hosted.Pages
             _apiUri = $"{UrlConstant.ApiBaseUrl}/api/";
             _encryptionService = encryptionService;
             _validateService = validateService;
-            Message = message;
-            Account = account;
         }
 
         public async Task<IActionResult> OnGet()
@@ -55,7 +52,7 @@ namespace MobileShop.Management.Hosted.Pages
             var response = await _client.GetAsync(_apiUri + $"account/get-account-id/{id}");
             var strData = await response.Content.ReadAsStringAsync();
 
-            Account = System.Text.Json.JsonSerializer.Deserialize<Account>(strData, option)!;
+            account = JsonSerializer.Deserialize<Account>(strData, option)!;
 
             return Page();
         }
@@ -80,7 +77,7 @@ namespace MobileShop.Management.Hosted.Pages
                     Request.Form["email"].Equals(string.Empty) || Request.Form["dob"].Equals(string.Empty) ||
                     Request.Form["role"].Equals(string.Empty))
                 {
-                    Message = "Information must not null";
+                    message = "Information must not null";
                     return RedirectToPage("UpdateAccount");
                 }
                 else
@@ -102,19 +99,19 @@ namespace MobileShop.Management.Hosted.Pages
 
                     if (!_validateService.ValidatePhone(phone))
                     {
-                        Message = "Phone numer must 10 characters";
+                        message = "Phone numer must 10 characters";
                         return RedirectToPage("UpdateAccount");
                     }
 
                     if (!_validateService.ValidateMail(email))
                     {
-                        Message = "Email not exist";
+                        message = "Email not exist";
                         return RedirectToPage("UpdateAccount");
                     }
 
                     if (!_validateService.ValidateName(fullname))
                     {
-                        Message = "Full name dont have number";
+                        message = "Full name dont have number";
                         return RedirectToPage("UpdateAccount");
                     }
 
@@ -129,7 +126,7 @@ namespace MobileShop.Management.Hosted.Pages
                         accountRequest.Phone = phone;
                         accountRequest.RoleId = role;
 
-                        json = System.Text.Json.JsonSerializer.Serialize(accountRequest);
+                        json = JsonSerializer.Serialize(accountRequest);
                     }
 
                     var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -141,7 +138,7 @@ namespace MobileShop.Management.Hosted.Pages
             }
             catch (Exception)
             {
-                Message = "Update profile failded";
+                message = "Update profile failded";
                 return RedirectToPage("UpdateAccount");
             }
         }
