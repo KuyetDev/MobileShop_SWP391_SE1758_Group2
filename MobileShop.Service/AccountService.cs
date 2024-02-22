@@ -5,6 +5,7 @@ namespace MobileShop.Service
 {
     public interface IAccountService
     {
+        //
         List<Account>? GetAccountsByKeyword(string keyword);
         List<Account>? GetAllAccount();
         Account? GetAccountById(int id);
