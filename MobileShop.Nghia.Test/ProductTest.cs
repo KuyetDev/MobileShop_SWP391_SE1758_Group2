@@ -87,6 +87,42 @@ namespace MobileShop.Nghia.Test
             Assert.That(result, Is.EqualTo(true));
 
           }
+
+        [Test]
+        public void GetProductByID_test()
+        {
+            var result = false;
+            var product = _productService.GetProductById(2);
+            if (product != null) result = true;
+            Assert.That(result, Is.EqualTo(true));
+        }
+
+        [Test]
+        public void GetProductsByCategoryId_test()
+        {
+            var result = false;
+            var product = _productService.GetProductsByCategoryId(2);
+            if (product != null) result = true;
+            Assert.That(result, Is.EqualTo(true));
+        }
+
+        [Test]
+        public void GetProductByKeyword_Test()
+        {
+            var result = false;
+            var keyword = "Samsung";
+            var products = _productService.GetProductsByKeyword(keyword);
+            if (products.Count > 0) result = true;
+            Assert.That(result, Is.EqualTo(true));
+        }
+        [Test]
+        public void GetProductsByKeywordAndCategoryId_test()
+        {
+            var result = false;
+            var product = _productService.GetProductsByKeywordAndCategoryId("Samsung",2);
+            if (product != null) result = true;
+            Assert.That(result, Is.EqualTo(true));
+        }
     }
  }
 
