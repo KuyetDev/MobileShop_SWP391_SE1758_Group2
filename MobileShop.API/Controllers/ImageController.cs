@@ -10,7 +10,7 @@ namespace MobileShop.API.Controllers
     {
         private readonly IImageService _imageService;
 
-        public ImageController(IImageService imageService, object category)
+        public ImageController(IImageService imageService)
         {
             _imageService = imageService;
         }
