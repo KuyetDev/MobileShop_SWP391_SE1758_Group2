@@ -65,6 +65,18 @@ namespace MobileShop.API.Controllers
             return Ok(coupons);
         }
 
+        [HttpGet("get-coupons-key/{key}")]
+        public IActionResult GetCouponByKey(string key)
+        {
+            var coupons = _couponService.GetCouponByKey(key);
+
+            if (coupons == null)
+            {
+                return NotFound("Coupon does not exist");
+            }
+            return Ok(coupons);
+        }
+
         [HttpPut("put-coupon")]
         public IActionResult UpdateCoupon(UpdateCouponRequest coupon)
         {
