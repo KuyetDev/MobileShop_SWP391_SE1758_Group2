@@ -31,7 +31,7 @@ namespace MobileShop.Management.Hosted.Pages
             return Task.FromResult<IActionResult>(Page());
         }
 
-        public async Task<IActionResult> OnPostSignin()
+        public async Task<IActionResult> OnPost()
         {
             if (string.IsNullOrEmpty(Request.Form["mail"]) || string.IsNullOrEmpty(Request.Form["password"]))
             {
