@@ -1,4 +1,5 @@
-﻿using MobileShop.Entity.DTOs.CouponDTO;
+﻿using Microsoft.EntityFrameworkCore;
+using MobileShop.Entity.DTOs.CouponDTO;
 using MobileShop.Entity.Models;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace MobileShop.Service
         bool UpdateDeleteStatusCoupon(int id);
         bool CheckExpiryCoupon(int id);
         Coupon? GetCouponByCode(string code);
+        List<Coupon> GetCouponByKey(string key);
     }
     public class CouponService : ICouponService
     {
@@ -30,8 +32,37 @@ namespace MobileShop.Service
         {
             try
             {
-                var coupons = _context.Coupons.Where(c => c.IsDeleted == false).ToList();
+                var coupons = _context.Coupons.ToList();
                 return coupons;
+            }
+            catch (Exception e)
+            {
+
+                throw new Exception(e.Message);
+            }
+        }
+
+        public List<Coupon> GetCouponByKey(string key)
+        {
+            try
+            {
+                var list = new List<Coupon>();
+                var sql = $"select * from Coupons where code like '%{key}%'";
+                var coupons = _context.Coupons.FromSqlRaw(sql);
+                foreach (var item in coupons)
+                {
+                    var coupon = new Coupon
+                    {
+                        CouponId = item.CouponId,
+                        Code = item.Code,
+                        DiscountPercent = item.DiscountPercent,
+                        ExpirationDate = item.ExpirationDate,
+                        IsDeleted = item.IsDeleted
+                    };
+                    list.Add(coupon);
+                }
+
+                return list;
             }
             catch (Exception e)
             {
