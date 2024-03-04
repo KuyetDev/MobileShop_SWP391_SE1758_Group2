@@ -6,4 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MobileShop.Entity\MobileShop.Entity.csproj" />
+    <ProjectReference Include="..\MobileShop.Service\MobileShop.Service.csproj" />
+    <ProjectReference Include="..\MobileShop.Shared\MobileShop.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
