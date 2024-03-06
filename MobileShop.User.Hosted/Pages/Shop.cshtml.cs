@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MobileShop.Entity.DTOs.CartDTO;
 using MobileShop.Entity.Models;
 using MobileShop.Shared.Constants;
 using Newtonsoft.Json;
@@ -61,7 +62,50 @@ namespace MobileShop.User.Hosted.Pages
                 {
                     service = Request.Query["fstore"].ToString();
                 }
-             
+
+                if (service.Equals("AddToCart") && !string.IsNullOrEmpty(json))
+                {
+
+                    var account = JsonConvert.DeserializeObject<Account>(json);
+                    var productId = Convert.ToInt32(Request.Query["productid"]);
+                    var quantity = 1;
+                    await _client.GetAsync(ApiUri + $"shopping/addtocart/{account.AccountId}&{productId}&{quantity}");
+                }
+
+                if (service.Equals("AddToCart") && string.IsNullOrEmpty(json))
+                {
+                    var productId = Convert.ToInt32(Request.Query["productid"]);
+                    var quantity = 1;
+                    Dictionary<int, Cart> cart;
+                    var jsonCart = HttpContext.Session.GetString(CartKey) ?? string.Empty;
+
+                    if (string.IsNullOrEmpty(jsonCart))
+                    {
+                        cart = new Dictionary<int, Cart>();
+                    }
+                    else
+                    {
+                        cart = JsonConvert.DeserializeObject<Dictionary<int, Cart>>(jsonCart);
+                    }
+
+                    if (cart.ContainsKey(productId))
+                    {
+                        cart[productId].Quantity += quantity;
+                    }
+                    else
+                    {
+                        var cartItem = new Cart
+                        {
+                            ProductId = productId,
+                            Quantity = quantity
+                        };
+                        cart.Add(productId, cartItem);
+                    }
+                    jsonCart = JsonConvert.SerializeObject(cart);
+                    HttpContext.Session.SetString(CartKey, jsonCart);
+
+                }
+
                 var response = await _client.GetAsync(ApiUri + $"product/get-all-product");
                 var response2 = await _client.GetAsync(ApiUri + $"category/get-all-category");
                 var strData = await response.Content.ReadAsStringAsync();
