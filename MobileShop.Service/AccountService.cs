@@ -5,7 +5,6 @@ namespace MobileShop.Service
 {
     public interface IAccountService
     {
-        //
         List<Account>? GetAccountsByKeyword(string keyword);
         List<Account>? GetAllAccount();
         Account? GetAccountById(int id);
@@ -15,6 +14,7 @@ namespace MobileShop.Service
         UpdateAccountResponse UpdateAccount(UpdateAccountRequest account);
         bool UpdateDeleteStatusAccount(int id);
         List<Account> GetAccountsByRoleId(int roleId);
+        Account? GetAccountGuestByEmail(string email);
     }
     public class AccountService : IAccountService
     {
@@ -85,6 +85,7 @@ namespace MobileShop.Service
             }
         }
 
+
         public Account? GetAccountByEmailAndPassword(string email, string password)
         {
             try
@@ -103,7 +104,20 @@ namespace MobileShop.Service
         {
             try
             {
-                var account = _context.Accounts.FirstOrDefault(a => a.Mail.Equals(email));
+                var account = _context.Accounts.Where(a => a.Mail.Equals(email) && a.IsDeleted == false && a.Active == true && a.RoleId != 1002).FirstOrDefault();
+                return account ?? null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public Account? GetAccountGuestByEmail(string email)
+        {
+            try
+            {
+                var account = _context.Accounts.Where(a => a.Mail.Equals(email) && a.IsDeleted == false && a.Active == false && a.RoleId == 1002).FirstOrDefault();
                 return account ?? null;
             }
             catch (Exception e)
@@ -188,10 +202,11 @@ namespace MobileShop.Service
                 _context.SaveChanges();
                 return true;
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 return false;
             }
         }
+
     }
-    }
+}

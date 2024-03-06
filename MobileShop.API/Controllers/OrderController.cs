@@ -49,10 +49,43 @@ namespace MobileShop.API.Controllers
             return Ok(order);
         }
 
+        [HttpGet("get-order-GuestId/{id}")]
+        public IActionResult GetOrderByGuestId(int id)
+        {
+            var order = _orderService.GetOrderByGuestId(id);
+            if (order == null)
+            {
+                return NotFound("Order does not exist");
+            }
+            return Ok(order);
+        }
+
         [HttpGet("get-all-order")]
         public IActionResult GetAllOrder()
         {
             var order = _orderService.GetAllOrders();
+            if (order == null)
+            {
+                return NotFound("Don't have order");
+            }
+            return Ok(order);
+        }
+
+        [HttpGet("get-orders-checkout/{cid}")]
+        public IActionResult GetAllOrderCheckoutByCustomerID(int cid)
+        {
+            var order = _orderService.GetOrderCheckoutByCustomerId(cid);
+            if (order == null)
+            {
+                return NotFound("Don't have order");
+            }
+            return Ok(order);
+        }
+
+        [HttpGet("get-orders-cutomername/{keyName}")]
+        public IActionResult GetAllOrdersByCustomerName(string keyName)
+        {
+            var order = _orderService.GetAllOrdersByCustomerName(keyName);
             if (order == null)
             {
                 return NotFound("Don't have order");

@@ -1,36 +1,58 @@
 ﻿@page
 @model MobileShop.Management.Hosted.Pages.LoginModel
 @{
-    ViewData["Title"] = "Login page";
+    ViewData["Title"] = "Login";
 }
-<div class="login-wrap">
-    <p style="color:Tomato;">@Model.message</p>
-    <div class="login-html">
-        <input id="tab-1" type="radio" name="tab" class="sign-in" checked><label for="tab-1" class="tab">Login</label>
-        <input id="tab-1" type="radio" name="tab" class="sign-up"><label for="tab-2" class="tab"></label>
-        <div class="login-form">
-
-            <form asp-page-handler="Signin" method="post">
-                <div class="sign-in-htm">
-                    <div class="group">
-                        <label for="user" class="label">Email</label>
-                        <input id="user" type="text" class="input" name="mail">
+<div id="preloder">
+    <div class="loader"></div>
+</div>
+<section class="checkout spad">
+    <div class="container">
+        <div class="checkout__form">
+            <form method="post">
+                <div class="row">
+                    <div class="col-lg-2 col-md-3">
                     </div>
-                    <div class="group">
-                        <label for="pass" class="label">Password</label>
-                        <input id="pass" type="password" class="input" data-type="password" name="password">
+                    <div class="col-lg-8 col-md-6">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="checkout__input">
+                                    @if (!string.IsNullOrEmpty(Model.message))
+                                    {
+                                        <p style="color:Tomato;">@Model.message</p>
+                                    }
+                                    <p>Mail<span>*</span></p>
+                                    <input type="text" name="mail">
+                                </div>
+                                <div class="checkout__input">
+                                    <p>Password<span>*</span></p>
+                                    <input type="password" name="password">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checkout__order">
+                            <button type="submit" class="site-btn" name="submit">SignIn</button>
+                        </div>
                     </div>
-                    <div class="group">
-                        <input type="submit" class="button" value="SignIn">
-                    </div>
-                    <div class="hr"></div>
-                    <div class="foot-lnk">
-                        <a asp-page="/MailForgotPassword">Forgot Password?</a>
+                    <div class="col-lg-2 col-md-3">
                     </div>
                 </div>
             </form>
-
-
+            <div class="row">
+                <div class="col-lg-2 col-md-3">
+                </div>
+                <div class="col-lg-8 col-md-6">
+                    <div class="row">
+                        <div class="col-lg-9">
+                        </div>
+                        <div class="col-lg-3">
+                            <a href="/MailForgotPassword" style="color:DodgerBlue;">Forgot password?</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3">
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</section>
