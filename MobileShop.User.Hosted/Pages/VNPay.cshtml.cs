@@ -52,7 +52,7 @@ namespace MobileShop.User.Hosted.Pages
             if (service.Equals("payment"))
             {
                 string url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-                string returnUrl = "https://localhost:7166/VNPay?fstore=paymentconfirm";
+                string returnUrl = "https://localhost:7042/VNPay?fstore=paymentconfirm";
                 string tmnCode = "JF3JL0X5";
                 string hashSecret = "HEGRFWKYJRWZZYNMRQJZJDSSCSDARYTQ";
                 PayLib pay = new PayLib();
