@@ -1,4 +1,5 @@
 ﻿@using System.Net.Http.Headers
+@using MobileShop.Entity.DTOs.CartDTO
 @using MobileShop.Shared.Constants
 @using System.Text.Json
 @{
@@ -12,6 +13,8 @@
             };
     int quantities = 0;
     var json = HttpContextAccessor.HttpContext!.Session.GetString("_login") ?? string.Empty;
+    var jsonCart = HttpContextAccessor.HttpContext!.Session.GetString("_cart") ?? string.Empty;
+
 
     Account? account = null;
 
@@ -30,6 +33,21 @@
             }
         }
         catch (Exception e)
+        {
+            quantities = 0;
+        }
+    }
+    else
+    {
+        if (!string.IsNullOrEmpty(jsonCart))
+        {
+            var cart = JsonConvert.DeserializeObject<Dictionary<int, Cart>>(jsonCart);
+            foreach (var c in cart)
+            {
+                quantities = quantities + c.Value.Quantity;
+            }
+        }
+        else
         {
             quantities = 0;
         }
@@ -55,7 +73,7 @@
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
 
 </head>
-<body>
+<body> 
     <header class="header">
         <div class="header__top">
             <div class="container">

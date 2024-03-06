@@ -17,6 +17,7 @@ namespace MobileShop.Service
         bool UpdateDeleteStatusOrderDetail(int oid, int pid);
         List<OrderDetail> GetOrderDetailsProcessByCustomerId(int cid);
         bool DeleteOrderDetail(int oid, int pid);
+        List<OrderDetail> GetOrderDetailsByOrderID(int oid);
     }
     public class OrderDetailService : IOrderDetailService
     {
@@ -34,6 +35,21 @@ namespace MobileShop.Service
             try
             {
                 var details = _context.OrderDetails.Where(o => o.IsDeleted == false)
+                     .ToList();
+                return details;
+
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public List<OrderDetail> GetOrderDetailsByOrderID(int oid)
+        {
+            try
+            {
+                var details = _context.OrderDetails.Where(o => o.IsDeleted == false && o.OrderId == oid)
                      .ToList();
                 return details;
 
@@ -164,4 +180,4 @@ namespace MobileShop.Service
             }
         }
     }
-    }
+}
