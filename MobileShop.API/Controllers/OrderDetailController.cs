@@ -5,6 +5,7 @@ using MobileShop.Service;
 
 namespace MobileShop.API.Controllers
 {
+
     [Route("api/orderdetail")]
     [ApiController]
     public class OrderDetailController : ControllerBase
@@ -50,9 +51,20 @@ namespace MobileShop.API.Controllers
         }
 
         [HttpGet("get-all-orderdetail")]
-        public IActionResult GetAllOrder()
+        public IActionResult GetAllOrderDetails()
         {
             var order = _orderDetailService.GetAllOrderDetails();
+            if (order == null)
+            {
+                return NotFound("Don't have order detail");
+            }
+            return Ok(order);
+
+        }
+        [HttpGet("get-orderdetails-OrderID/{oid}")]
+        public IActionResult GetOrderDetailsByOrderID(int oid)
+        {
+            var order = _orderDetailService.GetOrderDetailsByOrderID(oid);
             if (order == null)
             {
                 return NotFound("Don't have order detail");
