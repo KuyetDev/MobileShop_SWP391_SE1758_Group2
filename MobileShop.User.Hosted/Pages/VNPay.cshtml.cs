@@ -16,6 +16,11 @@ namespace MobileShop.User.Hosted.Pages
         private readonly HttpClient _client;
         private string ApiUri = string.Empty;
         private string LoginKey = "_login";
+        private string DiscountKey = "_discount";
+        private string AddressKey = "_address";
+        private string ErrorKey = "_error";
+        private string GuestKey = "_guest";
+        private string CartKey = "_cart";
 
         public VNPayModel(IHttpContextAccessor httpContextAccessor)
         {
@@ -29,7 +34,9 @@ namespace MobileShop.User.Hosted.Pages
         {
             var service = string.Empty;
             var json = HttpContext.Session.GetString(LoginKey) ?? string.Empty;
-           
+            var jsonCart = HttpContext.Session.GetString(CartKey) ?? string.Empty;
+            var jsonGuest = HttpContext.Session.GetString(GuestKey) ?? string.Empty;
+            var jsonCoupon = HttpContext.Session.GetString(DiscountKey) ?? string.Empty;
             Account account = null;
 
             var option = new JsonSerializerOptions
@@ -37,8 +44,13 @@ namespace MobileShop.User.Hosted.Pages
                 PropertyNameCaseInsensitive = true,
             };
 
+            if (!string.IsNullOrEmpty(Request.Query["fstore"]))
+            {
+                service = Request.Query["fstore"].ToString();
+            }
 
-
+            if (service.Equals("payment"))
+            {
                 string url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
                 string returnUrl = "https://localhost:7166/VNPay?fstore=paymentconfirm";
                 string tmnCode = "JF3JL0X5";
@@ -46,12 +58,48 @@ namespace MobileShop.User.Hosted.Pages
                 PayLib pay = new PayLib();
                 double price = 0;
                 var products = string.Empty;
+                //user
+                if (!string.IsNullOrEmpty(json))
+                {
+                    account = JsonConvert.DeserializeObject<Account>(json);
+                }
+                else
+                {
+                    //guest
+                    account = JsonConvert.DeserializeObject<Account>(jsonGuest);
+                }
+                var response2 = await _client.GetAsync(ApiUri + $"orderdetail/get-orderdetails-customerid/{account.AccountId}");
+                var strData2 = await response2.Content.ReadAsStringAsync();
+                var orderDetails = System.Text.Json.JsonSerializer.Deserialize<List<OrderDetail>>(strData2, option);
 
+                foreach (var d in orderDetails)
+                {
+                    var response3 = await _client.GetAsync(ApiUri + $"product/get-product-id/{d.ProductId}");
+                    var strData3 = await response3.Content.ReadAsStringAsync();
+                    var product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData3, option);
+                    if (string.IsNullOrEmpty(products))
+                    {
+                        products = product.ProductName;
+                    }
+                    else
+                    {
+                        products = products + ", " + product.ProductName;
+                    }
+                    price += d.Quantity * product.Price;
+
+                }
+
+                if (!string.IsNullOrEmpty(jsonCoupon))
+                {
+                    var coupon = System.Text.Json.JsonSerializer.Deserialize<Coupon>(jsonCoupon);
+                    var discount = (coupon.DiscountPercent / 100) * price;
+                    price = price - discount;
+                }
 
                 pay.AddRequestData("vnp_Version", "2.1.0");
                 pay.AddRequestData("vnp_Command", "pay");
                 pay.AddRequestData("vnp_TmnCode", tmnCode);
-                pay.AddRequestData("vnp_Amount", "");
+                pay.AddRequestData("vnp_Amount", Convert.ToString(100 * price));
                 pay.AddRequestData("vnp_BankCode", "");
                 pay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
                 pay.AddRequestData("vnp_CurrCode", "VND");
@@ -64,15 +112,16 @@ namespace MobileShop.User.Hosted.Pages
 
                 string paymentUrl = pay.CreateRequestUrl(url, hashSecret);
 
-
+                return Redirect(paymentUrl);
+            }
 
             if (service.Equals("paymentconfirm"))
             {
                 if (Request.Query.Count > 0)
                 {
-                    string hashSecrets = "HEGRFWKYJRWZZYNMRQJZJDSSCSDARYTQ";
+                    string hashSecret = "HEGRFWKYJRWZZYNMRQJZJDSSCSDARYTQ";
                     var vnpayData = Request.Query;
-                    PayLib pay1 = new PayLib();
+                    PayLib pay = new PayLib();
 
                     foreach (var kvp in vnpayData)
                     {
@@ -96,18 +145,62 @@ namespace MobileShop.User.Hosted.Pages
                     {
                         if (vnp_ResponseCode == "00")
                         {
-                            
+                            if (!string.IsNullOrEmpty(json))
+                            {
+                                account = JsonConvert.DeserializeObject<Account>(json);
+                            }
+                            else
+                            {
+                                account = JsonConvert.DeserializeObject<Account>(jsonGuest);
+
+                            }
+                            var response = await _client.GetAsync(ApiUri + $"order/get-order-CustomerId/{account.AccountId}");
+                            var strData = await response.Content.ReadAsStringAsync();
+                            var order = System.Text.Json.JsonSerializer.Deserialize<Order>(strData, option);
+                            /*status
+                             * 0: add to cart
+                             * 1: checkout
+                             * 2: shipping
+                             * 3: complete
+                             */
+                            order.Status = 1;
+                            order.PaymentId = 1;
+
+                            if (!string.IsNullOrEmpty(HttpContext.Session.GetString(AddressKey)))
+                            {
+                                order.Address = HttpContext.Session.GetString(AddressKey);
+
+                            }
+
+                            var jsonOrder = JsonConvert.SerializeObject(order);
+                            var content = new StringContent(jsonOrder, Encoding.UTF8, "application/json");
+                            await _client.PutAsync(ApiUri + $"order/put-order", content);
+
+                            var coupon = System.Text.Json.JsonSerializer.Deserialize<Coupon>(jsonCoupon);
+
+                            if (coupon.CouponId != 5)
+                            {
+                                coupon.IsDeleted = true;
+                                jsonCoupon = JsonConvert.SerializeObject(coupon);
+                                var content2 = new StringContent(jsonCoupon, Encoding.UTF8, "application/json");
+                                await _client.PutAsync(ApiUri + $"coupon/put-coupon", content2);
+                            }
+
+                            HttpContext.Session.SetString(ErrorKey, "");
+                            HttpContext.Session.SetString(CartKey, "");
 
                             return RedirectToPage("Purchase");
 
                         }
                         else
                         {
+                            HttpContext.Session.SetString(ErrorKey, "An error occurred while processing the invoice " + orderId + " | Trading code: " + vnpayTranId + " | Error code: " + vnp_ResponseCode);
                             return RedirectToPage("Checkout");
                         }
                     }
                     else
                     {
+                        HttpContext.Session.SetString(ErrorKey, "An error occurred during processing");
                         return RedirectToPage("Checkout");
                     }
                 }

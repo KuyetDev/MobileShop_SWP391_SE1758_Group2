@@ -19,10 +19,14 @@ namespace MobileShop.API.Controllers
         public IActionResult AddAccount([FromBody] CreateAccountRequest account)
         {
             var result = _accountService.AddAccount(account);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
             return Ok(result);
         }
 
-        [HttpGet("get-account-id/{id:int}")]
+        [HttpGet("get-account-id/{id}")]
         public IActionResult GetAccountById(int id)
         {
             var account = _accountService.GetAccountById(id);
@@ -30,7 +34,6 @@ namespace MobileShop.API.Controllers
             {
                 return NotFound("Account does not exist");
             }
-
             return Ok(account);
         }
 
@@ -42,7 +45,17 @@ namespace MobileShop.API.Controllers
             {
                 return NotFound("Account does not exist");
             }
+            return Ok(account);
+        }
 
+        [HttpGet("get-account-mailguest/{mail}")]
+        public IActionResult GetAccountGuestByMail(string mail)
+        {
+            var account = _accountService.GetAccountGuestByEmail(mail);
+            if (account == null)
+            {
+                return NotFound("Account does not exist");
+            }
             return Ok(account);
         }
 
@@ -54,40 +67,58 @@ namespace MobileShop.API.Controllers
             {
                 return NotFound("Account does not exist");
             }
-
             return Ok(account);
         }
 
 
-        [HttpGet("get-accounts-role/{role:int}")]
+        [HttpGet("get-accounts-role/{role}")]
         public IActionResult GetAccountsByKeyword(int role)
         {
+
             var accounts = _accountService.GetAccountsByRoleId(role);
-            return accounts.Count == 0 ? Ok("Don't have account") : Ok(accounts);
+            if (accounts != null && accounts.Count == 0)
+            {
+                return Ok("Don't have account");
+            }
+            return Ok(accounts);
         }
 
         [HttpGet("get-accounts-keyword/{keyword}")]
         public IActionResult GetAccountsByKeyword(string keyword)
         {
+
             var accounts = _accountService.GetAccountsByKeyword(keyword);
-            return accounts is { Count: 0 } ? Ok("Don't have account") : Ok(accounts);
+            if (accounts != null && accounts.Count == 0)
+            {
+                return Ok("Don't have account");
+            }
+            return Ok(accounts);
         }
 
         [HttpGet("get-all-accounts")]
         public IActionResult GetAllAccount()
         {
+
             var accounts = _accountService.GetAllAccount();
-            return accounts is { Count: 0 } ? Ok("Don't have account") : Ok(accounts);
+            if (accounts != null && accounts.Count == 0)
+            {
+                return Ok("Don't have account");
+            }
+            return Ok(accounts);
         }
 
         [HttpPut("put-account")]
         public IActionResult UpdateAccount(UpdateAccountRequest account)
         {
             var result = _accountService.UpdateAccount(account);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
             return Ok(result);
         }
 
-        [HttpDelete("delete-account/{id:int}")]
+        [HttpPut("delete-account/{id}")]
         public IActionResult DeleteAccount(int id)
         {
             var result = _accountService.UpdateDeleteStatusAccount(id);
@@ -95,7 +126,6 @@ namespace MobileShop.API.Controllers
             {
                 return StatusCode(500);
             }
-
             return Ok("Delete account complete");
         }
     }
