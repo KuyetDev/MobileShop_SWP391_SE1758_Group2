@@ -40,6 +40,18 @@ namespace MobileShop.API.Controllers
             return Ok(coupon);
         }
 
+        [HttpGet("get-all-coupon-id/{id}")]
+        public IActionResult GetCouponById2(int id)
+        {
+            var coupon = _couponService.GetCouponById2(id);
+
+            if (coupon == null)
+            {
+                return NotFound("Coupon does not exist");
+            }
+            return Ok(coupon);
+        }
+
 
         [HttpGet("get-coupon-code/{code}")]
         public IActionResult GetCouponByCode(string code)
