@@ -53,7 +53,7 @@
                     double discount = 0;
                     double amount = 0;
 
-                    var response2 = await _client.GetAsync(ApiUri + $"coupon/get-coupon-id/{item.CouponId}");
+                    var response2 = await _client.GetAsync(ApiUri + $"coupon/get-all-coupon-id/{item.CouponId}");
                     var strData2 = await response2.Content.ReadAsStringAsync();
                     coupon = System.Text.Json.JsonSerializer.Deserialize<Coupon>(strData2, option);
 
