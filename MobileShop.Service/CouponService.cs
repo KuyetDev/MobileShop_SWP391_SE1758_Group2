@@ -19,6 +19,7 @@ namespace MobileShop.Service
         bool CheckExpiryCoupon(int id);
         Coupon? GetCouponByCode(string code);
         List<Coupon> GetCouponByKey(string key);
+        Coupon? GetCouponById2(int id);
     }
     public class CouponService : ICouponService
     {
@@ -77,6 +78,21 @@ namespace MobileShop.Service
             try
             {
                 var coupon = _context.Coupons.FirstOrDefault(c => c.IsDeleted == false && c.CouponId == id);
+                return coupon ?? null;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        //get coupon when discount code enable
+        public Coupon? GetCouponById2(int id)
+        {
+
+            try
+            {
+                var coupon = _context.Coupons.FirstOrDefault(c =>c.CouponId == id);
                 return coupon ?? null;
             }
             catch (Exception e)
