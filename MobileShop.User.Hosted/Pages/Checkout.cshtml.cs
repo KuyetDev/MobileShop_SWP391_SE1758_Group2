@@ -125,6 +125,16 @@ namespace MobileShop.User.Hosted.Pages
                     var response = await _client.GetAsync(ApiUri + $"order/get-order-CustomerId/{account.AccountId}");
                     var strData = await response.Content.ReadAsStringAsync();
                     var order = System.Text.Json.JsonSerializer.Deserialize<Order>(strData, option);
+
+                    var response2 = await _client.GetAsync(ApiUri + $"orderdetail/get-orderdetails-customerid/{account.AccountId}");
+                    var strData2 = await response2.Content.ReadAsStringAsync();
+                    orderDetails = System.Text.Json.JsonSerializer.Deserialize<List<OrderDetail>>(strData2, option);
+
+                    if (!string.IsNullOrEmpty(jsonCoupon))
+                    {
+                        coupon = System.Text.Json.JsonSerializer.Deserialize<Coupon>(jsonCoupon);
+                    }
+
                     /*status
                      * 0: add to cart
                      * 1: checkout
@@ -133,13 +143,22 @@ namespace MobileShop.User.Hosted.Pages
                      */
                     order.Status = 1;
                     order.PaymentId = 2;
+                    order.CouponId = coupon.CouponId;
                     order.Address = Request.Form["address"];
 
                     var jsonOrder = JsonConvert.SerializeObject(order);
                     var content = new StringContent(jsonOrder, Encoding.UTF8, "application/json");
                     await _client.PutAsync(ApiUri + $"order/put-order", content);
-                    /*
-                    foreach(var item in orderDetails)
+
+                    if (coupon.CouponId != 5)
+                    {
+                        coupon.IsDeleted = true;
+                        jsonCoupon = JsonConvert.SerializeObject(coupon);
+                        var content2 = new StringContent(jsonCoupon, Encoding.UTF8, "application/json");
+                        await _client.PutAsync(ApiUri + $"coupon/put-coupon", content2);
+                    }
+
+                    foreach (var item in orderDetails)
                     {
                         var response6 = await _client.GetAsync(ApiUri + $"product/get-product-id/{item.ProductId}");
                         var strData6 = await response6.Content.ReadAsStringAsync();
@@ -151,7 +170,7 @@ namespace MobileShop.User.Hosted.Pages
                         var content7 = new StringContent(jsonProduct, Encoding.UTF8, "application/json");
                         await _client.PutAsync(ApiUri + $"product/put-product", content7);
                     }
-                    */
+                    
                     return RedirectToPage("Purchase");
                 }
 
@@ -338,15 +357,6 @@ namespace MobileShop.User.Hosted.Pages
                             Quantity = item.Value.Quantity,
                             IsDeleted = false
                         };
-                        var response6 = await _client.GetAsync(ApiUri + $"product/get-product-id/{item.Value.ProductId}");
-                        var strData6 = await response6.Content.ReadAsStringAsync();
-                        var product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData6, option);
-
-                        product.Quantity -= item.Value.Quantity;
-
-                        var jsonProduct = System.Text.Json.JsonSerializer.Serialize(product);
-                        var content7 = new StringContent(jsonProduct, Encoding.UTF8, "application/json");
-                        await _client.PutAsync(ApiUri + $"product/put-product", content7);
 
                         var jsonDetail = System.Text.Json.JsonSerializer.Serialize(detail);
                         var content5 = new StringContent(jsonDetail, Encoding.UTF8, "application/json");
