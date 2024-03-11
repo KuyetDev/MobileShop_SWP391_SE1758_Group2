@@ -186,6 +186,23 @@ namespace MobileShop.User.Hosted.Pages
                                 await _client.PutAsync(ApiUri + $"coupon/put-coupon", content2);
                             }
 
+                            var response2 = await _client.GetAsync(ApiUri + $"orderdetail/get-orderdetails-OrderID/{order.OrderId}");
+                            var strData2 = await response2.Content.ReadAsStringAsync();
+                            var orderDetails = System.Text.Json.JsonSerializer.Deserialize<List<OrderDetail>>(strData2, option);
+
+                            foreach (var item in orderDetails)
+                            {
+                                var response6 = await _client.GetAsync(ApiUri + $"product/get-product-id/{item.ProductId}");
+                                var strData6 = await response6.Content.ReadAsStringAsync();
+                                var product = System.Text.Json.JsonSerializer.Deserialize<Product>(strData6, option);
+
+                                product.Quantity -= item.Quantity;
+
+                                var jsonProduct = System.Text.Json.JsonSerializer.Serialize(product);
+                                var content7 = new StringContent(jsonProduct, Encoding.UTF8, "application/json");
+                                await _client.PutAsync(ApiUri + $"product/put-product", content7);
+                            }
+
                             HttpContext.Session.SetString(ErrorKey, "");
                             HttpContext.Session.SetString(CartKey, "");
 

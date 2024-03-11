@@ -121,7 +121,6 @@ namespace MobileShop.Management.Hosted.Pages
                 // ignored
             }
 
-            var pass = _encryptionService.HashMD5(password);
             var newAccount = new Account
             {
                 FullName = fullname,
@@ -130,7 +129,7 @@ namespace MobileShop.Management.Hosted.Pages
                 Dob = dob,
                 Gender = gender,
                 Phone = phone,
-                Password = pass,
+                Password = password,
                 Active = true,
                 RoleId = role,
                 IsDeleted = false
