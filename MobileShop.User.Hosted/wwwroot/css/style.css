@@ -171,6 +171,28 @@ ol {
 	letter-spacing: 2px;
 }
 
+.primary-btn-shop {
+	display: inline-block;
+	font-size: 14px;
+	padding: 10px 28px 10px;
+	color: red;
+	text-transform: uppercase;
+	font-weight: 700;
+	background: #ebebeb;
+	letter-spacing: 2px;
+}
+
+.primary-btn-checkout {
+	display: inline-block;
+	font-size: 14px;
+	padding: 10px 28px 10px;
+	color: red;
+	text-transform: uppercase;
+	font-weight: 700;
+	background: #fff;
+	letter-spacing: 2px;
+}
+
 .site-btn {
 	font-size: 14px;
 	color: #ffffff;
