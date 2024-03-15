@@ -34,7 +34,7 @@ namespace MobileShop.API.Controllers
         {
             var product = _productService.GetProductById(productId);
             var customer = _accountService.GetAccountById(customerId);
-            var order = _orderService.GetOrderByCustomerId(customerId);
+            var order = _orderService.GetOrderZeroStatusByCustomerId(customerId);
             if (product == null)
             {
                 return NotFound();
@@ -53,7 +53,7 @@ namespace MobileShop.API.Controllers
                     IsDeleted = false
                 };
                 _orderService.AddOrder(newOrder);
-                order = _orderService.GetOrderByCustomerId(customerId);
+                order = _orderService.GetOrderZeroStatusByCustomerId(customerId);
                 var detail = _orderDetailService.GetOrderDetailByOrderIdAndProductId(order.OrderId, productId);
                 if (detail == null)
                 {

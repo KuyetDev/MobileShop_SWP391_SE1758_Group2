@@ -41,7 +41,7 @@ namespace MobileShop.API.Controllers
         [HttpGet("get-order-CustomerId/{id}")]
         public IActionResult GetOrderByCustomerId(int id)
         {
-            var order = _orderService.GetOrderByCustomerId(id);
+            var order = _orderService.GetOrderZeroStatusByCustomerId(id);
             if (order == null)
             {
                 return NotFound("Order does not exist");
