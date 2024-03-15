@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MobileShop.Entity.DTOs.CartDTO;
 using MobileShop.Entity.Models;
 using MobileShop.Shared.Constants;
 using Newtonsoft.Json;
@@ -14,6 +15,7 @@ namespace MobileShop.User.Hosted.Pages
         private string ApiUri = string.Empty;
         private string ProductIdKey = "_productid";
         private string LoginKey = "_login";
+        private string CartKey = "_cart";
         public string message { get; set; }
         public Product Product { get; set; }
         public Image Image { get; set; }
@@ -86,7 +88,33 @@ namespace MobileShop.User.Hosted.Pages
             }
             else
             {
+                Dictionary<int, Cart> cart;
+                var jsonCart = HttpContext.Session.GetString(CartKey) ?? string.Empty;
 
+                if (string.IsNullOrEmpty(jsonCart))
+                {
+                    cart = new Dictionary<int, Cart>();
+                }
+                else
+                {
+                    cart = JsonConvert.DeserializeObject<Dictionary<int, Cart>>(jsonCart);
+                }
+
+                if (cart.ContainsKey(productId))
+                {
+                    cart[productId].Quantity += quantity;
+                }
+                else
+                {
+                    var cartItem = new Cart
+                    {
+                        ProductId = productId,
+                        Quantity = quantity
+                    };
+                    cart.Add(productId, cartItem);
+                }
+                jsonCart = JsonConvert.SerializeObject(cart);
+                HttpContext.Session.SetString(CartKey, jsonCart);
             }
             return Page();
         }

@@ -16,7 +16,7 @@ namespace MobileShop.Service
         CreateOrderResponse AddOrder(CreateOrderRequest order);
         UpdateOrderResponse UpdateOrder(UpdateOrderRequest order);
         bool UpdateDeleteStatusOrder(int id);
-        Order? GetOrderByCustomerId(int id);
+        Order? GetOrderZeroStatusByCustomerId(int id);
         List<Order>? GetOrderCheckoutByCustomerId(int id);
         Order? GetOrderByGuestId(int id);
         List<Order> GetAllOrdersByCustomerName(string keyName);
@@ -97,7 +97,7 @@ namespace MobileShop.Service
             }
         }
 
-        public Order? GetOrderByCustomerId(int id)
+        public Order? GetOrderZeroStatusByCustomerId(int id)
         {
             try
             {
