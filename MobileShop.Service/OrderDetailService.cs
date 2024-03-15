@@ -64,7 +64,7 @@ namespace MobileShop.Service
         {
             try
             {
-                var order = _orderService.GetOrderByCustomerId(cid);
+                var order = _orderService.GetOrderZeroStatusByCustomerId(cid);
                 if (order == null)
                 {
                     return null;
