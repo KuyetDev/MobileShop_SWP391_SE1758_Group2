@@ -106,7 +106,7 @@ namespace MobileShop.Service
 
             try
             {
-                var coupon = _context.Coupons.FirstOrDefault(c => c.IsDeleted == false && c.Code.Equals(code));
+                var coupon = _context.Coupons.FirstOrDefault(c => c.IsDeleted == false && c.Code.ToLower().Equals(code.ToLower()));
                 return coupon ?? null;
             }
             catch (Exception e)
