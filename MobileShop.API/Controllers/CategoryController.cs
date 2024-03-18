@@ -44,6 +44,18 @@ namespace MobileShop.API.Controllers
             return Ok(category);
         }
 
+        [HttpGet("get-category-name/{name}")]
+        public IActionResult GetAccountByName(string name)
+        {
+            var category = _categoryService.GetCategoryByName(name);
+            if (category == null)
+            {
+                return NotFound("Category does not exist");
+            }
+
+            return Ok(category);
+        }
+
         [HttpPut("put-category")]
         public IActionResult UpdateCategory(UpdateCategoryRequest category)
         {

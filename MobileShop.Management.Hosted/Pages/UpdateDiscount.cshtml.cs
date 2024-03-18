@@ -110,13 +110,29 @@ namespace MobileShop.Management.Hosted.Pages
                 return Page();
             }
 
-            coupon.Code = code;
-            coupon.DiscountPercent = percent;
-            coupon.ExpirationDate = date;
+            try
+            {
+                var response2 = await _client.GetAsync(ApiUri + $"coupon/get-coupon-code/{code}");
+                var strData2 = await response2.Content.ReadAsStringAsync();
+                var discountCheck = System.Text.Json.JsonSerializer.Deserialize<Coupon>(strData2, option);
 
-            var jsonCoupon = System.Text.Json.JsonSerializer.Serialize(coupon);
-            var content = new StringContent(jsonCoupon, Encoding.UTF8, "application/json");
-            await _client.PutAsync(ApiUri + "coupon/put-coupon", content);
+                if (discountCheck != null && discountCheck.CouponId != coupon.CouponId)
+                {
+                    message = "Discount code exist, try again";
+                    return Page();
+                }
+            }
+            catch(Exception ex)
+            {
+                coupon.Code = code;
+                coupon.DiscountPercent = percent;
+                coupon.ExpirationDate = date;
+
+                var jsonCoupon = System.Text.Json.JsonSerializer.Serialize(coupon);
+                var content = new StringContent(jsonCoupon, Encoding.UTF8, "application/json");
+                await _client.PutAsync(ApiUri + "coupon/put-coupon", content);
+            }
+
             return RedirectToPage("DiscountManager");
 
         }

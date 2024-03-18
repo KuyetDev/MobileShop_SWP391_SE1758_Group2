@@ -4,6 +4,7 @@ using MobileShop.Entity.Models;
 using MobileShop.Shared.Constants;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 
 namespace MobileShop.Management.Hosted.Pages
 {
@@ -37,6 +38,11 @@ namespace MobileShop.Management.Hosted.Pages
 
         public async Task<IActionResult> OnPost()
         {
+            var option = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+            };
+
             if (Request.Form["code"].Equals(string.Empty) || Request.Form["percent"].Equals(string.Empty)
                 || Request.Form["expiration_date"].Equals(string.Empty))
             {
@@ -70,17 +76,32 @@ namespace MobileShop.Management.Hosted.Pages
                 return Page();
             }
 
-            var coupon = new Coupon
+            try
             {
-                Code = code,
-                DiscountPercent = percent,
-                ExpirationDate = date,
-                IsDeleted = false
-            };
+                var response = await _client.GetAsync(ApiUri + $"coupon/get-coupon-code/{code}");
+                var strData = await response.Content.ReadAsStringAsync();
+                var discountCheck = System.Text.Json.JsonSerializer.Deserialize<Coupon>(strData, option);
 
-            var jsonCoupon = System.Text.Json.JsonSerializer.Serialize(coupon);
-            var content = new StringContent(jsonCoupon, Encoding.UTF8, "application/json");
-            await _client.PostAsync(ApiUri + $"coupon/add-coupon", content);
+                if (discountCheck != null)
+                {
+                    message = "Discount code exist, try again";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                var coupon = new Coupon
+                {
+                    Code = code,
+                    DiscountPercent = percent,
+                    ExpirationDate = date,
+                    IsDeleted = false
+                };
+
+                var jsonCoupon = System.Text.Json.JsonSerializer.Serialize(coupon);
+                var content = new StringContent(jsonCoupon, Encoding.UTF8, "application/json");
+                await _client.PostAsync(ApiUri + $"coupon/add-coupon", content);
+            }
 
             return RedirectToPage("DiscountManager");
         }

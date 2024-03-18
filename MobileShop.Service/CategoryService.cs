@@ -10,6 +10,7 @@ namespace MobileShop.Service
         CreateCategoryResponse AddCategory(CreateCategoryRequest category);
         UpdateCategoryResponse UpdateCategory(UpdateCategoryRequest category);
         bool UpdateDeleteStatusCategory(int id);
+        Category? GetCategoryByName(string name);
     }
 
 
@@ -45,6 +46,19 @@ namespace MobileShop.Service
                 return category ?? null;
             }
             catch(Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public Category? GetCategoryByName(string name)
+        {
+            try
+            {
+                var category = _context.Categories.FirstOrDefault(c => c.CategoryName.ToUpper().Equals(name.ToUpper()) && c.IsDeleted == false);
+                return category ?? null;
+            }
+            catch (Exception e)
             {
                 throw new Exception(e.Message);
             }

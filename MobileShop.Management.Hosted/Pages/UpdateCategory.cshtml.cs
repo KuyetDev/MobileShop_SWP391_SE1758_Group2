@@ -75,11 +75,26 @@ namespace MobileShop.Management.Hosted.Pages
                 return Page();
             }
 
-            category.CategoryName = Request.Form["name"];
+            try
+            {
+                var response2 = await _client.GetAsync(ApiUri + $"category/get-category-name/{Request.Form["name"]}");
+                var strData2 = await response2.Content.ReadAsStringAsync();
+                var categoryCheck = System.Text.Json.JsonSerializer.Deserialize<Category>(strData2, option);
 
-            var jsonCategory = System.Text.Json.JsonSerializer.Serialize(category);
-            var content = new StringContent(jsonCategory, Encoding.UTF8, "application/json");
-            await _client.PutAsync(ApiUri + "category/put-category", content);
+                if (categoryCheck != null && categoryCheck.CategoryId != category.CategoryId)
+                {
+                    message = "Category name exist, try again";
+                    return Page();
+                }
+            }
+            catch (Exception ex)
+            {
+                category.CategoryName = Request.Form["name"];
+
+                var jsonCategory = System.Text.Json.JsonSerializer.Serialize(category);
+                var content = new StringContent(jsonCategory, Encoding.UTF8, "application/json");
+                await _client.PutAsync(ApiUri + "category/put-category", content);
+            }
 
             return RedirectToPage("CategoriesManager");
         }
