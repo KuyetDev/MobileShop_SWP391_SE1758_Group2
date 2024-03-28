@@ -121,8 +121,18 @@ namespace MobileShop.Management.Hosted.Pages
                     message = "Discount code exist, try again";
                     return Page();
                 }
+                else
+                {
+                    coupon.Code = code;
+                    coupon.DiscountPercent = percent;
+                    coupon.ExpirationDate = date;
+
+                    var jsonCoupon = System.Text.Json.JsonSerializer.Serialize(coupon);
+                    var content = new StringContent(jsonCoupon, Encoding.UTF8, "application/json");
+                    await _client.PutAsync(ApiUri + "coupon/put-coupon", content);
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 coupon.Code = code;
                 coupon.DiscountPercent = percent;
